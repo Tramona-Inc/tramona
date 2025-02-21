@@ -21,7 +21,7 @@ export default function OnlyOtherRequestState() {
         <Button asChild variant="outline">
           <Link href="/host/requests/Dallas?option=other">
             View other requests
-          </Link>{" "}
+          </Link>
         </Button>
       </EmptyStateFooter>
     </EmptyState>

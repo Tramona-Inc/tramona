@@ -12,7 +12,7 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useIsLg } from "@/utils/utils";
 import React from "react";
-import { SeparatedData } from "@/server/server-utils";
+import { RequestsProvider } from "./RequestsContext";
 
 const alerts = [
   {
@@ -60,21 +60,22 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
 
   // <--------------------Data fetching logic ---------------->
   const { data: separatedData, isLoading: isLoadingProperties } =
-  api.properties.getHostPropertiesWithRequests.useQuery(
-    { currentHostTeamId: currentHostTeamId! },
-    {
-      enabled: !!currentHostTeamId,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: Infinity,
-      cacheTime: Infinity,
-      retry: false,
-    },
-  );
+    api.properties.getHostPropertiesWithRequests.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
+        cacheTime: Infinity,
+        retry: false,
+        suspense: false,
+        keepPreviousData: true,
+      },
+    );
 
-
-  const { data: offers, isLoading: isLoadingOffers } =
+  const { data: offers } =
     api.offers.getAllHostOffers.useQuery(
       { currentHostTeamId: currentHostTeamId! },
       {
@@ -96,45 +97,49 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
       },
     );
 
-  const { normal, other } = separatedData ?? { normal: [], other: [] };
-  const noNormalRequests = normal.length === 0;
-  const hasOtherRequests = other.length > 0;
-  const completelyEmpty = noNormalRequests && other.length === 0;
-
   const initialNavigationDone = useRef(false);
 
   useEffect(() => {
-    if (!router.isReady || isLoadingProperties || initialNavigationDone.current) return;
+    if (
+      !router.isReady ||
+      isLoadingProperties ||
+      initialNavigationDone.current ||
+      !separatedData ||
+      !currentHostTeamId ||
+      router.pathname !== "/host/requests" // Only run on index page
+    )
+      return;
 
-    const currentPath = router.asPath.split('?')[0];
-    const currentOption = router.query.option;
+    const currentPath = router.asPath.split("?")[0];
 
-    // Get the first normal city in a stable way
-    const targetCity = separatedData?.normal[0]?.city;
-    const shouldNavigateToCity = !!targetCity && isLg;
+    // Check if we have any normal requests
+    const hasNormalRequests = (separatedData?.normal.length ?? 0) > 0;
+    const firstNormalCity = hasNormalRequests
+      ? separatedData?.normal[0]?.city
+      : undefined;
 
-    // Determine target route
-    const targetPath = shouldNavigateToCity
-      ? `/host/requests/${targetCity}`
-      : '/host/requests';
-
-    const targetOption = shouldNavigateToCity ? 'normal' : undefined;
-
-    // Check if we need to navigate
-    const needsNavigation = currentPath !== targetPath || currentOption !== targetOption;
-
-    if (needsNavigation) {
+    // Only navigate if we're on the index page and have normal requests
+    if (!firstNormalCity || currentPath !== "/host/requests") {
       initialNavigationDone.current = true;
-      void router.push({
-        pathname: targetPath,
-        query: targetOption ? { option: targetOption } : undefined,
-      });
-    } else {
-      initialNavigationDone.current = true;
+      return;
     }
-  }, [router, router.isReady, isLoadingProperties, separatedData?.normal, isLg]);
 
-
+    // Navigate to first city
+    initialNavigationDone.current = true;
+    void router.push({
+      pathname: `/host/requests/${firstNormalCity}`,
+      query: { option: "normal" },
+    });
+  }, [
+    router,
+    router.isReady,
+    isLoadingProperties,
+    separatedData?.normal,
+    isLg,
+    isIndex,
+    currentHostTeamId,
+    separatedData,
+  ]);
 
   const offerData = useMemo(() => {
     if (offers) {
@@ -206,129 +211,136 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
 
   // <--------------------------------Render------------------>
   return (
-    <div className="mx-auto flex">
-      {showSidebar && (
-        <div className="border-b border-r bg-white">
-          <div className="pt-6">
-            <h1 className="pl-6 text-3xl font-semibold">Requests</h1>
-            <div className="mt-6">
-              <div className="flex w-full">
-                <button
-                  onClick={() => handleTabChange("city")}
-                  className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
-                    activeTab === "city"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  City Requests
-                  {activeTab === "city" && (
-                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
-                  )}
-                </button>
-                <button
-                  onClick={() => handleTabChange("property-bids")}
-                  className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
+    <RequestsProvider
+      value={{
+        separatedData,
+        isLoading: isLoadingProperties,
+      }}
+    >
+      <div className="mx-auto flex">
+        {showSidebar && (
+          <div className="border-b border-r bg-white">
+            <div className="pt-6">
+              <h1 className="pl-6 text-3xl font-semibold">Requests</h1>
+              <div className="mt-6">
+                <div className="flex w-full">
+                  <button
+                    onClick={() => handleTabChange("city")}
+                    className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
+                      activeTab === "city"
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    City Requests
+                    {activeTab === "city" && (
+                      <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleTabChange("property-bids")}
+                    className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
+                      activeTab === "property-bids"
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Property Bids
+                    {activeTab === "property-bids" && (
+                      <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <ScrollArea className="sticky h-screen w-screen overflow-auto border-t px-4 py-8 lg:w-96">
+              {activeTab === "city" ? (
+                <SidebarCity
+                  selectedOption={selectedOption}
+                  offerData={offerData}
+                  initialSelectedCity={initialSelectedCity}
+                />
+              ) : (
+                <SidebarRequestToBook
+                  properties={requestToBookData}
+                  isLoading={isLoadingRequestToBook}
+                  initialSelectedPropertyId={initialSelectedPropertyId}
+                />
+              )}
+            </ScrollArea>
+          </div>
+        )}
+
+        {showChildren && (
+          <div className="flex-1 bg-[#fafafa] px-4 lg:block">
+            <div className="lg:mb-30 mx-auto my-6 mb-24 lg:mt-8">
+              <div className="my-6 lg:hidden">
+                <Button
+                  onClick={() =>
                     activeTab === "property-bids"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+                      ? void router.push("/host/requests/requests-to-book")
+                      : void router.push("/host/requests")
+                  }
+                  size="icon"
+                  variant="ghost"
                 >
-                  Property Bids
-                  {activeTab === "property-bids" && (
-                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
-                  )}
-                </button>
+                  <ChevronLeft />
+                </Button>
+              </div>
+              <div className="mx-auto max-w-5xl">
+                {activeTab === "city" && (
+                  <div className="mb-4 flex flex-row justify-between">
+                    <div className="flex flex-row gap-x-2">
+                      <Button
+                        variant={
+                          selectedOption === "normal" ? "primary" : "white"
+                        }
+                        className="rounded-full shadow-md"
+                        onClick={() => handleOptionChange("normal")}
+                      >
+                        Primary
+                      </Button>
+                      <Button
+                        variant={
+                          selectedOption === "sent" ? "primary" : "white"
+                        }
+                        className="rounded-full shadow-md"
+                        onClick={() => handleOptionChange("sent")}
+                      >
+                        Sent
+                      </Button>
+                    </div>
+                    <Button
+                      variant={selectedOption === "other" ? "primary" : "white"}
+                      className="rounded-full shadow-md"
+                      onClick={() => handleOptionChange("other")}
+                    >
+                      Other
+                    </Button>
+                  </div>
+                )}
+
+                <Alert className="mb-2">
+                  <AlertTriangleIcon />
+                  <AlertTitle>Tip</AlertTitle>
+                  <AlertDescription>
+                    {activeTab === "city" && selectedOption === "normal"
+                      ? alerts[0]?.text
+                      : activeTab === "property-bids" &&
+                          selectedOption === "normal"
+                        ? alerts[1]?.text
+                        : activeTab === "city" && selectedOption === "other"
+                          ? alerts[2]?.text
+                          : alerts[3]?.text}
+                  </AlertDescription>
+                </Alert>
+                {children}
               </div>
             </div>
           </div>
-          <ScrollArea className="sticky h-screen w-screen overflow-auto border-t px-4 py-8 lg:w-96">
-            {activeTab === "city" ? (
-              <SidebarCity
-                selectedOption={selectedOption}
-                separatedData={separatedData ?? null}
-                offerData={offerData}
-                isLoading={isLoadingProperties}
-                initialSelectedCity={initialSelectedCity}
-              />
-            ) : (
-              <SidebarRequestToBook
-                properties={requestToBookData}
-                isLoading={isLoadingRequestToBook}
-                initialSelectedPropertyId={initialSelectedPropertyId}
-              />
-            )}
-          </ScrollArea>
-        </div>
-      )}
-
-      {showChildren && (
-        <div className="flex-1 bg-[#fafafa] px-4 lg:block">
-          <div className="lg:mb-30 mx-auto my-6 mb-24 lg:mt-8">
-            <div className="my-6 lg:hidden">
-              <Button
-                onClick={() =>
-                  activeTab === "property-bids"
-                    ? void router.push("/host/requests/requests-to-book")
-                    : void router.push("/host/requests")
-                }
-                size="icon"
-                variant="ghost"
-              >
-                <ChevronLeft />
-              </Button>
-            </div>
-            <div className="mx-auto max-w-5xl">
-              {activeTab === "city" && (
-                <div className="mb-4 flex flex-row justify-between">
-                  <div className="flex flex-row gap-x-2">
-                    <Button
-                      variant={
-                        selectedOption === "normal" ? "primary" : "white"
-                      }
-                      className="rounded-full shadow-md"
-                      onClick={() => handleOptionChange("normal")}
-                    >
-                      Primary
-                    </Button>
-                    <Button
-                      variant={selectedOption === "sent" ? "primary" : "white"}
-                      className="rounded-full shadow-md"
-                      onClick={() => handleOptionChange("sent")}
-                    >
-                      Sent
-                    </Button>
-                  </div>
-                  <Button
-                    variant={selectedOption === "other" ? "primary" : "white"}
-                    className="rounded-full shadow-md"
-                    onClick={() => handleOptionChange("other")}
-                  >
-                    Other
-                  </Button>
-                </div>
-              )}
-
-              <Alert className="mb-2">
-                <AlertTriangleIcon />
-                <AlertTitle>Tip</AlertTitle>
-                <AlertDescription>
-                  {activeTab === "city" && selectedOption === "normal"
-                    ? alerts[0]?.text
-                    : activeTab === "property-bids" &&
-                        selectedOption === "normal"
-                      ? alerts[1]?.text
-                      : activeTab === "city" && selectedOption === "other"
-                        ? alerts[2]?.text
-                        : alerts[3]?.text}
-                </AlertDescription>
-              </Alert>
-              {children}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </RequestsProvider>
   );
 });
 

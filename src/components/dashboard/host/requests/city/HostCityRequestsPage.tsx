@@ -11,7 +11,8 @@ import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import CityRequestSection from "./CityRequestSection";
 import OffersSentSection from "./OffersSentSection";
 import NoRequestEmptyState from "../NoRequestEmptyState";
-import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { useRequests } from "../RequestsContext";
+import OnlyOtherRequestEmptyState from "../OnlyOtherRequestsEmptyState";
 export default function HostCityRequestsPage() {
   const { toast } = useToast();
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
@@ -20,9 +21,6 @@ export default function HostCityRequestsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const { city, option } = router.query;
-
-  const { currentHostTeamId } = useHostTeamStore();
-
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
@@ -53,30 +51,11 @@ export default function HostCityRequestsPage() {
       },
     });
 
-    const { data: separatedData, isLoading: isRequestsLoading } =
-    api.properties.getHostPropertiesWithRequests.useQuery(
-      {
-        currentHostTeamId: Number(currentHostTeamId!),
-      },
-      {
-        enabled: !!currentHostTeamId,
-      },
-    );
-
+  const { separatedData, isLoading: isRequestsLoading } = useRequests();
 
   const { normal, other } = separatedData ?? { normal: [], other: [] };
   const noNormalRequests = normal.length === 0;
-  const hasOtherRequests = other.length > 0;
   const completelyEmpty = noNormalRequests && other.length === 0;
-
-  // useEffect(() => {
-  //   if (separatedData) {
-  //     setProperties(separatedData.normal);
-  //   }
-  // }, [separatedData]);
-
-  console.log(normal);
-  console.log(other);
 
   return (
     <div>
@@ -102,6 +81,10 @@ export default function HostCityRequestsPage() {
           separatedData={separatedData}
           isRequestsLoading={isRequestsLoading}
         />
+      ) : completelyEmpty ? (
+        <NoRequestEmptyState />
+      ) : other[0]?.city ? (
+        <OnlyOtherRequestEmptyState firstCity={other[0].city} />
       ) : (
         <NoRequestEmptyState />
       )}

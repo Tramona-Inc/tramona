@@ -4,14 +4,14 @@ import { RequestCardLoadingGrid } from "../RequestCardLoadingGrid";
 import { Button } from "@/components/ui/button";
 
 import { type Property } from "@/server/db/schema";
-import { api } from "@/utils/api";
 import { useRouter } from "next/router";
 import { useState, useMemo } from "react";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore"; // Import store
 import NoRequestEmptyState from "../NoRequestEmptyState";
 import PaginationButtons from "@/components/_common/PaginationButtons";
-import OnlyOtherRequestState from "./OnlyOtherRequestState";
+import OnlyOtherRequestEmptyState from "../OnlyOtherRequestsEmptyState";
 import { SeparatedData } from "@/server/server-utils";
+
 interface CityRequestSectionProps {
   setDialogOpen: (open: boolean) => void;
   setSelectedRequest: (request: HostDashboardRequest | null) => void;
@@ -30,10 +30,14 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   isRequestsLoading,
 }) => {
   const router = useRouter();
-  const { query } = useRouter(); // Get query from router
+  const { query } = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+  const currentHostTeamId = useHostTeamStore(
+    (state) => state.currentHostTeamId,
+  );
+  const ITEMS_PER_PAGE = 8;
 
-  const { currentHostTeamId } = useHostTeamStore();
-
+  // Move all useMemo hooks to the top
   const { city, option } = useMemo(() => {
     return {
       city: query.city as string | undefined,
@@ -41,50 +45,33 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
     };
   }, [query.city, query.option]);
 
-
-  const priceRestriction = option === "other";
-
-
-  const { normal, other } = separatedData ?? { normal: [], other: [] };
-  const noNormalRequests = normal.length === 0;
-  const hasOtherRequests = other.length > 0;
-  const completelyEmpty = noNormalRequests && other.length === 0;
-
-  const requestsWithProperties = priceRestriction
-    ? separatedData?.other
-    : separatedData?.normal;
-
-  console.log(requestsWithProperties);
-
-  const cityRequestsData = requestsWithProperties?.find((p) => p.city === city);
-  console.log(cityRequestsData);
-
-  const currentCityRequests = cityRequestsData?.requests;
-
-  console.log(currentCityRequests);
-
-  //pagination logic begins (used for PaginationButtons.tsx)
-  // todo: put all logic into PaginationButtons.tsx
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const ITEMS_PER_PAGE = 8;
-
   const paginatedCityRequests = useMemo(() => {
+    if (!separatedData || !router.isReady) return null;
+
+    const priceRestriction = option === "other";
+    const { normal, other } = separatedData;
+    const requestsWithProperties = priceRestriction ? other : normal;
+    const cityRequestsData = requestsWithProperties.find(
+      (p) => p.city === city,
+    );
+    const currentCityRequests = cityRequestsData?.requests;
+
+    if (!currentCityRequests) return null;
+
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return currentCityRequests?.slice(startIndex, endIndex);
-  }, [currentCityRequests, currentPage, ITEMS_PER_PAGE]);
+    return currentCityRequests.slice(startIndex, endIndex);
+  }, [
+    separatedData,
+    router.isReady,
+    option,
+    city,
+    currentPage,
+    ITEMS_PER_PAGE,
+  ]);
 
-  // pagination logic ends
-
-  if (
-    isRequestsLoading ||
-    !router.isReady
-    // currentCityRequests === undefined
-  )
-
-  {
+  // Wait for data to be ready
+  if (!router.isReady || isRequestsLoading || !separatedData) {
     console.log("loading");
     return (
       <div className="w-full">
@@ -92,6 +79,30 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
       </div>
     );
   }
+
+  const priceRestriction = option === "other";
+  const { normal, other } = separatedData;
+  const noNormalRequests = normal.length === 0;
+  const hasOtherRequests = other.length > 0;
+  const completelyEmpty = noNormalRequests && !hasOtherRequests;
+
+  // Check empty states
+  if (completelyEmpty) {
+    return <NoRequestEmptyState />;
+  }
+
+  if (noNormalRequests && hasOtherRequests && option === "normal") {
+    // Get the first city that has other requests
+    const firstCityWithOther = other[0]?.city;
+    if (!firstCityWithOther) return null;
+    return <OnlyOtherRequestEmptyState firstCity={firstCityWithOther} />;
+  }
+
+  // Get current city requests
+  const requestsWithProperties = priceRestriction ? other : normal;
+  const cityRequestsData = requestsWithProperties.find((p) => p.city === city);
+  const currentCityRequests = cityRequestsData?.requests;
+
   return (
     <div className="w-full">
       {paginatedCityRequests && paginatedCityRequests.length > 0 ? (
@@ -115,12 +126,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
             </div>
           ))}
         </div>
-      ) : (
-        <>
-          {completelyEmpty && <NoRequestEmptyState />}
-          {noNormalRequests && hasOtherRequests && <OnlyOtherRequestState />}
-        </>
-      )}
+      ) : null}
       {currentCityRequests && currentCityRequests.length > 0 && (
         <PaginationButtons
           items={currentCityRequests}

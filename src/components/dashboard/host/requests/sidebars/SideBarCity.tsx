@@ -4,29 +4,23 @@ import { plural } from "@/utils/utils";
 import EmptyRequestState from "./EmptyRequestState";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import { range } from "lodash";
-import {
-  type SeparatedData,
-  type RequestsPageOfferData,
-} from "@/server/server-utils";
+import { type RequestsPageOfferData } from "@/server/server-utils";
 import { useRouter } from "next/router";
 import React from "react";
-import OnlyOtherRequestState from "../city/OnlyOtherRequestState";
+import { useRequests } from "../RequestsContext";
 
 interface SidebarCityProps {
   selectedOption: "normal" | "other" | "sent";
-  separatedData: SeparatedData | null;
   offerData: RequestsPageOfferData | null;
-  isLoading: boolean;
   initialSelectedCity?: string;
 }
 
 const SidebarCity = React.memo(function SidebarCity({
   selectedOption,
-  separatedData,
   offerData,
-  isLoading,
   initialSelectedCity,
 }: SidebarCityProps) {
+  const { separatedData, isLoading } = useRequests();
   const [selectedCity, setSelectedCity] = useState<string | null>(
     initialSelectedCity ?? null,
   );
@@ -35,7 +29,7 @@ const SidebarCity = React.memo(function SidebarCity({
   );
   const router = useRouter();
   const { query } = router;
-  const { offers, city } = query;
+  const { city } = query;
 
   useEffect(() => {
     setSelectedCity(initialSelectedCity ?? null);
@@ -69,14 +63,8 @@ const SidebarCity = React.memo(function SidebarCity({
     );
   }
 
-  const { normal, other } = separatedData ?? { normal: [], other: [] };
-  const noNormalRequests = normal.length === 0;
-  const hasOtherRequests = other.length > 0;
-  const completelyEmpty = noNormalRequests && other.length === 0;
-
   if (!isLoading) {
-    if (completelyEmpty) return <EmptyRequestState />;
-    if (noNormalRequests && hasOtherRequests) return <EmptyRequestState />;
+    return <EmptyRequestState />;
   }
 
   if (selectedOption === "sent") {
