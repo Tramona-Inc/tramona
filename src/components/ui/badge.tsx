@@ -22,6 +22,7 @@ const badgeVariants = cva(
         primaryGreen: "bg-teal-900 hover:bg-teal-950 text-white",
         white: "bg-white text-black",
         whiteGreen: "bg-white text-primaryGreen",
+        notification: "bg-primaryGreen text-white absolute -right-2 -top-2 min-w-[20px] h-5 flex items-center justify-center"
       },
       size: {
         sm: "text-xs px-1.5 h-5 gap-0.5 font-medium",

@@ -13,6 +13,7 @@ import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInit
 import { useIsLg } from "@/utils/utils";
 import React from "react";
 import { RequestsProvider } from "./RequestsContext";
+import { Badge } from "@/components/ui/badge";
 
 const alerts = [
   {
@@ -55,8 +56,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
     router.asPath.includes("requests-to-book") ? "property-bids" : "city",
   );
 
-  const selectedOption =
-    (router.query.option as SelectedOptionType) ?? "normal";
+  const selectedOption = (router.query.option as SelectedOptionType) || "normal";
 
   // <--------------------Data fetching logic ---------------->
   const { data: separatedData, isLoading: isLoadingProperties } =
@@ -75,19 +75,18 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
       },
     );
 
-  const { data: offers } =
-    api.offers.getAllHostOffers.useQuery(
-      { currentHostTeamId: currentHostTeamId! },
-      {
-        enabled: !!currentHostTeamId,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-        staleTime: Infinity,
-        cacheTime: Infinity,
-        retry: false,
-      },
-    );
+  const { data: offers } = api.offers.getAllHostOffers.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: Infinity,
+      cacheTime: Infinity,
+      retry: false,
+    },
+  );
 
   const { data: requestToBookData, isLoading: isLoadingRequestToBook } =
     api.requestsToBook.getAllRequestToBookProperties.useQuery(
@@ -174,13 +173,19 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
       if (option === selectedOption) return;
 
       let newPathname = "/host/requests";
-      if (option === "other") {
-        if (separatedData?.other[0]) {
-          newPathname = `/host/requests/${separatedData.other[0].city}`;
-        }
+      const currentCity = router.query.city as string;
+
+      // If we have a current city, keep it when switching tabs
+      if (currentCity) {
+        newPathname = `/host/requests/${currentCity}`;
+      }
+      // Otherwise use first city from appropriate data set if available
+      else if (option === "other" && separatedData?.other[0]) {
+        newPathname = `/host/requests/${separatedData.other[0].city}`;
       } else if (separatedData?.normal[0]) {
         newPathname = `/host/requests/${separatedData.normal[0].city}`;
       }
+
       void router.push(
         {
           pathname: newPathname,
@@ -310,13 +315,27 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
                         Sent
                       </Button>
                     </div>
-                    <Button
-                      variant={selectedOption === "other" ? "primary" : "white"}
-                      className="rounded-full shadow-md"
-                      onClick={() => handleOptionChange("other")}
-                    >
-                      Other
-                    </Button>
+                    <div className="relative">
+                      <Button
+                        variant={
+                          selectedOption === "other" ? "primary" : "white"
+                        }
+                        className="rounded-full shadow-md"
+                        onClick={() => handleOptionChange("other")}
+                      >
+                        Other
+                      </Button>
+                      {separatedData?.other &&
+                        separatedData.other.length > 0 &&
+                        selectedOption !== "other" && (
+                          <Badge variant="notification">
+                            {separatedData.other.reduce(
+                              (acc, city) => acc + city.requests.length,
+                              0,
+                            )}
+                          </Badge>
+                        )}
+                    </div>
                   </div>
                 )}
 

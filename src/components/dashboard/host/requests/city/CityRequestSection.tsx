@@ -83,6 +83,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   const priceRestriction = option === "other";
   const { normal, other } = separatedData;
   const noNormalRequests = normal.length === 0;
+  const noOtherRequests = other.length === 0;
   const hasOtherRequests = other.length > 0;
   const completelyEmpty = noNormalRequests && !hasOtherRequests;
 
@@ -91,11 +92,28 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
     return <NoRequestEmptyState />;
   }
 
+  // Show empty state when there are no other requests but normal requests exist
+  if (option === "other" && noOtherRequests) {
+    return <NoRequestEmptyState />;
+  }
+
   if (noNormalRequests && hasOtherRequests && option === "normal") {
     // Get the first city that has other requests
     const firstCityWithOther = other[0]?.city;
     if (!firstCityWithOther) return null;
-    return <OnlyOtherRequestEmptyState firstCity={firstCityWithOther} />;
+
+    // Calculate total number of other requests
+    const totalOtherRequests = other.reduce(
+      (acc, city) => acc + city.requests.length,
+      0,
+    );
+
+    return (
+      <OnlyOtherRequestEmptyState
+        firstCity={firstCityWithOther}
+        otherRequestsCount={totalOtherRequests}
+      />
+    );
   }
 
   // Get current city requests

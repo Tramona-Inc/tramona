@@ -84,7 +84,7 @@ export default function HostCityRequestsPage() {
       ) : completelyEmpty ? (
         <NoRequestEmptyState />
       ) : other[0]?.city ? (
-        <OnlyOtherRequestEmptyState firstCity={other[0].city} />
+        <OnlyOtherRequestEmptyState firstCity={other[0].city} otherRequestsCount={other.length} />
       ) : (
         <NoRequestEmptyState />
       )}

@@ -45,7 +45,7 @@ function generateRandomNumGuestsBetween1And4() {
 export default async function makeFakeRequest() {
   const { checkInDate, checkOutDate, numNights } = generateRandomCheckInAndCheckOutDates();
   // const randomPrice = generateRandomPriceBetween100And450(numNights);
-  const randomPrice = 50 * 100 * numNights;
+  const randomPrice = 200 * 100 * numNights;
   await generateFakeRequest(city, checkInDate, checkOutDate, generateRandomNumGuestsBetween1And4(), randomPrice).then(async () => {
     console.log("Fake request generated");
   });

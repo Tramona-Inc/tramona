@@ -21,27 +21,35 @@ const SidebarCity = React.memo(function SidebarCity({
   initialSelectedCity,
 }: SidebarCityProps) {
   const { separatedData, isLoading } = useRequests();
-  const [selectedCity, setSelectedCity] = useState<string | null>(
-    initialSelectedCity ?? null,
-  );
-  const [selectedCityOffers, setSelectedCityOffers] = useState<string | null>(
-    null,
-  );
   const router = useRouter();
   const { query } = router;
   const { city } = query;
 
+  // Update selectedCity based on router's city query
+  const [selectedCity, setSelectedCity] = useState<string | null>(
+    (city as string) ?? initialSelectedCity ?? null,
+  );
+  const [selectedCityOffers, setSelectedCityOffers] = useState<string | null>(
+    null,
+  );
+
+  // Update selectedCity when router city changes
   useEffect(() => {
-    setSelectedCity(initialSelectedCity ?? null);
-  }, [initialSelectedCity]);
+    setSelectedCity((city as string) ?? null);
+  }, [city]);
 
   const displayedData = useMemo(() => {
-    return selectedOption !== "sent"
-      ? separatedData?.[selectedOption]
-      : offerData && selectedOption === "sent"
+    if (selectedOption === "sent") {
+      return offerData && selectedOption === "sent"
         ? Object.values(offerData[selectedOption])
         : undefined;
-  }, [separatedData, offerData, selectedOption]);
+    }
+
+    // Don't return empty array while loading
+    if (isLoading || !separatedData) return undefined;
+
+    return separatedData[selectedOption];
+  }, [separatedData, offerData, selectedOption, isLoading]);
 
   const handleCityOffersClick = useCallback((city: string) => {
     setSelectedCityOffers(city);
@@ -53,6 +61,7 @@ const SidebarCity = React.memo(function SidebarCity({
     setSelectedCity(city);
   }, []);
 
+  // Show loading state while data is being fetched
   if (!displayedData) {
     return (
       <div className="pt-4">
@@ -63,7 +72,8 @@ const SidebarCity = React.memo(function SidebarCity({
     );
   }
 
-  if (!isLoading) {
+  // Show empty state if there are no cities with requests
+  if (displayedData.length === 0) {
     return <EmptyRequestState />;
   }
 
@@ -107,7 +117,8 @@ const SidebarCity = React.memo(function SidebarCity({
   return (
     <div className="pt-4">
       {displayedData.map((cityData, index) => {
-        const isSelected = selectedCity === cityData.city;
+        // Use city from router query instead of selectedCity state
+        const isSelected = cityData.city === city;
         return (
           <Link
             href={{
@@ -142,4 +153,5 @@ const SidebarCity = React.memo(function SidebarCity({
     </div>
   );
 });
+
 export default SidebarCity;
