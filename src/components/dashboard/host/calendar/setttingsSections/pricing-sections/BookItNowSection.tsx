@@ -126,8 +126,8 @@ export default function BookItNowSection({
             max={80}
           />
           <p className="text-xs text-muted-foreground">
-            Hosts that offer a discount on Tramona and keep pricing normal on
-            Airbnb see the best results.
+            Book it now typically increases bookings by 20% and will
+            automatically block off the dates on Tramona, Airbnb, and Vrbo.
           </p>
           <div className="flex flex-col gap-2">
             {isError && (

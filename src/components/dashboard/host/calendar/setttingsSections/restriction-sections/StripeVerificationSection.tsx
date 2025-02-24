@@ -1,44 +1,45 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { api } from "@/utils/api"
-import { useHostTeamStore } from "@/utils/store/hostTeamStore"
-import { toast } from "@/components/ui/use-toast"
-import { errorToast } from "@/utils/toasts"
-import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown"
-import type { Property } from "@/server/db/schema"
+import { useState } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { api } from "@/utils/api";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
+// import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown" // commented out import of CalendarSettingsDropdown
+import type { Property } from "@/server/db/schema";
 
 export default function StripeVerificationSection({
   stripeVerRequired,
   property,
 }: {
-  stripeVerRequired: boolean
-  property: Property
+  stripeVerRequired: boolean;
+  property: Property;
 }) {
-  const { currentHostTeamId } = useHostTeamStore()
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation()
+  const { currentHostTeamId } = useHostTeamStore();
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState(stripeVerRequired ? "yes" : "no")
+  // const [open, setOpen] = useState(false) // commented out open state
+  const [value, setValue] = useState(stripeVerRequired ? "yes" : "no"); // keeping value and setValue for logic, but UI is commented out
 
   const handleSave = async () => {
     try {
       await updateProperty({
         updatedProperty: { ...property, stripeVerRequired: value === "yes" },
         currentHostTeamId: currentHostTeamId!,
-      })
-      toast({ title: "Property Updated!" })
+      });
+      toast({ title: "Property Updated!" });
     } catch (error) {
-      errorToast()
+      errorToast();
     }
-  }
+  };
 
   return (
     <div className="rounded-lg border">
-      <CalendarSettingsDropdown title="Stripe Verification" description="Require the user to be Stripe-verified." open={open} setOpen={setOpen} />
+      {/* commented out CalendarSettingsDropdown and its content */}
+      {/* <CalendarSettingsDropdown title="Stripe Verification" description="Require the user to be Stripe-verified." open={open} setOpen={setOpen} />
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
@@ -72,8 +73,8 @@ export default function StripeVerificationSection({
             Save
           </Button>
         </div>
-      </div>
+      </div> */}
+      {/* Commented out Stripe Verification Dropdown Section */}
     </div>
-  )
+  );
 }
-

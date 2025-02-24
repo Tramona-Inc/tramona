@@ -139,7 +139,7 @@ export default function RequestToBookPageMobileBottomCard({
           {verificationStatus?.isIdentityVerified === "false" &&
             property.stripeVerRequired === true && (
               <p className="text-center text-xs font-semibold text-red-500">
-                Host requires Stripe verification prior to booking
+                Host requires verification prior to booking
               </p>
             )}
         </CardContent>
