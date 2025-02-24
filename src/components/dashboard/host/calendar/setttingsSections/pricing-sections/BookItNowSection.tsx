@@ -104,7 +104,8 @@ export default function BookItNowSection({
       <div className="flex flex-row justify-between space-x-1">
         <p className="text-base text-muted-foreground">
           Turn on Book it now to allow guests to book your property instantly.
-          All bookings automatically block off the dates on Tramona and Airbnb.
+          All bookings automatically block off the dates on Tramona, Airbnb, and
+          Vrbo.
         </p>
         <Switch
           checked={localBookItNowChecked}

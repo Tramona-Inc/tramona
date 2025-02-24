@@ -118,3 +118,11 @@ export default function WelcomeEmail({ name }: { name: string }) {
     </Layout>
   );
 }
+
+// [Link to Host Information Page] - Replace with the actual link to your host information page.
+
+// [Link to traveler search/request page] - Replace with the actual link to your traveler search or request page.
+
+// [Link to Help Center] - Replace with the actual link to your Help Center.
+
+// referralLink prop: You will need to pass the dynamically generated referral link for each user to the WelcomeEmail component as the referralLink prop.

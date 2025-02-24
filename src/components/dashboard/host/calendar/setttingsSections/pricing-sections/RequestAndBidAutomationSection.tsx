@@ -82,8 +82,10 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
 
   return (
     <div className="relative rounded-lg border">
+      {/* Fully commented out section below */}
+      {/*
       {/* Overlay */}
-      {nameYourPriceOpen && (
+      {/* {nameYourPriceOpen && (
         <div
           className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white bg-opacity-50 backdrop-blur-sm"
           style={{ pointerEvents: "auto" }}
@@ -94,16 +96,17 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
             Coming Soon
           </p>
         </div>
-      )}
+      )} */}
 
-      <CalendarSettingsDropdown
+      {/* CalendarSettingsDropdown */}
+      {/* <CalendarSettingsDropdown
         title="Requests and Bids Automation"
         description="Automate your response to make sure you maximize your bookings."
         open={nameYourPriceOpen}
         setOpen={setNameYourPriceOpen}
-      />
+      /> */}
 
-      <div
+      {/* <div
         className={`relative overflow-hidden transition-all duration-300 ease-in-out ${
           nameYourPriceOpen
             ? "-mt-4 max-h-[1000px] p-6 opacity-100"
@@ -111,7 +114,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
         }`}
       >
         <p className="text-base font-semibold">
-          Every day we get thousands of requests from travelers. Here&apos;s how
+          Every day we get thousands of requests from travelers. Here's how
           you can automate your response to make sure you maximize your
           bookings.
         </p>
@@ -145,7 +148,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
               <TableBody>
                 {!discountTiers || discountTiers.length === 0 ? (
                   <div>
-                    Click &quot;Add tier&quot; to add discounts to your auto
+                    Click "Add tier" to add discounts to your auto
                     matches
                   </div>
                 ) : (
@@ -225,7 +228,8 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
             </Button>
           </div>
         </div>
-      </div>
+      */}
+      {/* End of fully commented out section */}
     </div>
   );
 }

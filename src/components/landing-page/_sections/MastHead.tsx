@@ -25,8 +25,6 @@ import { useIsXl } from "@/utils/utils";
 import HeyHosts from "./hey-hosts/HeyHosts";
 
 export default function MastHead() {
-
-
   const isXl = useIsXl();
   const isLg = useIsLg();
   const router = useRouter();
@@ -43,7 +41,14 @@ export default function MastHead() {
 
       if (toggleSectionRef.current) {
         const buttonPosition = toggleSectionRef.current.offsetTop;
-        setHasPassedButtons(scrollPosition > buttonPosition + 400);
+        setHasPassedButtons(scrollPosition > buttonPosition + 600); // Changed offset to 600
+
+        // --- Logging for Debugging (ADDED THESE LINES) ---
+        console.log("scrollPosition:", scrollPosition);
+        console.log("isScrolled:", scrollPosition > 20);
+        console.log("buttonPosition:", buttonPosition);
+        console.log("hasPassedButtons:", scrollPosition > buttonPosition + 600);
+        // --- End Logging ---
       }
     };
 
@@ -185,16 +190,18 @@ export default function MastHead() {
         </div>
 
         <div className="relative">
-          <div className="h-96">
+          <div className="relative h-96">
+            {" "}
+            {/* Make parent div relative for Image fill */}
             <Image
               src={landingBg2}
               alt=""
               fill
               placeholder="blur"
-              className="object-cover object-center brightness-90"
+              style={{ objectFit: "cover" }} // Inline style for objectFit
+              className="object-cover object-center brightness-90" // Inline style for objectFit
             />
             <div className="absolute inset-0 bg-black bg-opacity-40" />
-
             <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center pl-4 text-left lg:hidden">
               <h2 className="mt-8 text-left text-3xl font-bold text-white sm:text-4xl">
                 Lets turn empty nights into bookings
@@ -214,8 +221,7 @@ export default function MastHead() {
                 </Link>
               </h3>
             </div>
-
-            <div className="max-w-8xl absolute inset-0 mx-auto hidden px-24 lg:flex lg:flex-row lg:items-center lg:justify-between">
+            <div className="absolute inset-0 mx-auto hidden max-w-8xl px-24 lg:flex lg:flex-row lg:items-center lg:justify-between">
               {/* Left side - Text Content */}
               <div className="w-full text-left">
                 <h2 className="mt-8 text-5xl font-bold text-white">
@@ -370,8 +376,8 @@ export default function MastHead() {
                   </motion.div>
                 </form>
 
-                */}
 
+                */}
             </div>
           </div>
         </div>
@@ -382,7 +388,7 @@ export default function MastHead() {
           {/* Keep this div wrapping the toggle and map/name-price section */}
           {/* Original Booking Toggle */}
           <div
-            ref={toggleSectionRef}
+            ref={toggleSectionRef} // <----  ENSURE ref IS HERE!
             className={`mx-auto mb-6 max-w-sm transition-all duration-300 md:max-w-md lg:max-w-2xl ${
               hasPassedButtons ? "opacity-0" : "opacity-100"
             }`}
