@@ -170,7 +170,6 @@ export async function scrapePage(url: string) {
     .then(($) => $("#data-deferred-state-0").text())
     .then((jsonStr) => JSON.parse(jsonStr))
     .then((unparsedData) => {
-      console.log("Raw Airbnb Page Data:", JSON.stringify(unparsedData, null, 2)); // Log with indentation for readability
       return pageDataSchema.parse(unparsedData);
     }).then((data) => data.niobeMinimalClientData[0][1].data.presentation)
     .then((page) => serpPageSchema.parse(page));
