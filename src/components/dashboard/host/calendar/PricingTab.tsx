@@ -42,7 +42,7 @@ export default function PricingTab({
       />
 
       {/* Name your price section */}
-      <RequestAndBidAutomationSection property={property} />
+      {/* <RequestAndBidAutomationSection property={property} /> */}
     </>
   );
 }

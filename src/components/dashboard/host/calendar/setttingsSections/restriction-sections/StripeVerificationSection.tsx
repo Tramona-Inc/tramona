@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -8,7 +6,7 @@ import { api } from "@/utils/api";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-// import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown" // commented out import of CalendarSettingsDropdown
+import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown" // commented out import of CalendarSettingsDropdown
 import type { Property } from "@/server/db/schema";
 
 export default function StripeVerificationSection({
@@ -20,6 +18,7 @@ export default function StripeVerificationSection({
 }) {
   const { currentHostTeamId } = useHostTeamStore();
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const [open, setOpen] = useState(false);
 
   // const [open, setOpen] = useState(false) // commented out open state
   const [value, setValue] = useState(stripeVerRequired ? "yes" : "no"); // keeping value and setValue for logic, but UI is commented out
@@ -38,8 +37,7 @@ export default function StripeVerificationSection({
 
   return (
     <div className="rounded-lg border">
-      {/* commented out CalendarSettingsDropdown and its content */}
-      {/* <CalendarSettingsDropdown title="Stripe Verification" description="Require the user to be Stripe-verified." open={open} setOpen={setOpen} />
+      <CalendarSettingsDropdown title="Stripe Verification" description="Require the user to be Stripe-verified." open={open} setOpen={setOpen} />
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
@@ -73,8 +71,7 @@ export default function StripeVerificationSection({
             Save
           </Button>
         </div>
-      </div> */}
-      {/* Commented out Stripe Verification Dropdown Section */}
+      </div>
     </div>
   );
 }

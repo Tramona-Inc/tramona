@@ -4,19 +4,21 @@ import {
 } from "@/components/_utils/VerificationContext";
 import Head from "next/head";
 import Banner from "./Banner";
-import { useSendUnsentRequest } from "@/utils/useSendUnsentRequests";
 import MastHead from "./_sections/MastHead";
+import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 
-export default function TravelerPage() {
-  useSendUnsentRequest();
-
+const TravelerPage = ({
+  requestFeed,
+}: {
+  requestFeed: FeedRequestItem[];
+}) => {
   return (
     <VerificationProvider>
       <Head>
         <title>Tramona</title>
       </Head>
       <VerificationBanner />
-      <MastHead />
+      <MastHead requestFeed={requestFeed} />
     </VerificationProvider>
   );
 }
@@ -30,3 +32,5 @@ const VerificationBanner = () => {
   if (!showBanner || (status !== "true" && status !== "pending")) return null;
   return <Banner type={status} onClose={handleCloseBanner} />;
 };
+
+export default TravelerPage;

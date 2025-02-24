@@ -23,8 +23,9 @@ import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 import { useIsLg } from "@/utils/utils";
 import { useIsXl } from "@/utils/utils";
 import HeyHosts from "./hey-hosts/HeyHosts";
-
-export default function MastHead() {
+import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
+import RequestFeed from "@/components/activity-feed/RequestFeed";
+const MastHead = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
   const isXl = useIsXl();
   const isLg = useIsLg();
   const router = useRouter();
@@ -41,14 +42,7 @@ export default function MastHead() {
 
       if (toggleSectionRef.current) {
         const buttonPosition = toggleSectionRef.current.offsetTop;
-        setHasPassedButtons(scrollPosition > buttonPosition + 600); // Changed offset to 600
-
-        // --- Logging for Debugging (ADDED THESE LINES) ---
-        console.log("scrollPosition:", scrollPosition);
-        console.log("isScrolled:", scrollPosition > 20);
-        console.log("buttonPosition:", buttonPosition);
-        console.log("hasPassedButtons:", scrollPosition > buttonPosition + 600);
-        // --- End Logging ---
+        setHasPassedButtons(scrollPosition > buttonPosition + 400); // Changed offset to 600
       }
     };
 
@@ -191,14 +185,11 @@ export default function MastHead() {
 
         <div className="relative">
           <div className="relative h-96">
-            {" "}
-            {/* Make parent div relative for Image fill */}
             <Image
               src={landingBg2}
               alt=""
               fill
               placeholder="blur"
-              style={{ objectFit: "cover" }} // Inline style for objectFit
               className="object-cover object-center brightness-90" // Inline style for objectFit
             />
             <div className="absolute inset-0 bg-black bg-opacity-40" />
@@ -244,151 +235,15 @@ export default function MastHead() {
                   </button>
                 </h3>
               </div>
-
-              {/* <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="items-center justify-center 2xl:pr-12"
-              >
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="mt-6 w-full lg:mt-0 lg:w-[400px]"
-                  >
-                    <div className="rounded-xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md">
-                      <h3 className="mb-1 text-2xl font-semibold text-white">
-                        Hey Hosts! 👋
-                      </h3>
-                      <p className="text-xs text-white/90">
-                        Not ready to sign up? Enter your email below and we will
-                        send you booking requests as they come in.
-                      </p>
-
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-xs font-medium text-white">
-                            Where are your properties located?
-                          </label>
-                          <div className="flex gap-2">
-                            <CityAutocomplete
-                              value={newCity}
-                              onValueChange={(value) => setNewCity(value)}
-                              open={popoverOpen}
-                              setOpen={setPopoverOpen}
-                              trigger={({ value, disabled }) => (
-                                <Input
-                                  ref={cityAutocompleteRef}
-                                  type="text"
-                                  placeholder="Enter city name"
-                                  value={value}
-                                  onChange={(e) => setNewCity(e.target.value)}
-                                  className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      e.preventDefault();
-                                      handleAddCity();
-                                    }
-                                  }}
-                                  disabled={disabled}
-                                />
-                              )}
-                            />
-                            <Button
-                              onClick={() => handleAddCity()}
-                              variant="secondary"
-                              size="icon"
-                              type="button"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          <div className="flex max-h-[40px] min-h-[40px] flex-wrap gap-2 overflow-y-auto">
-                            <AnimatePresence>
-                              {cities.map((city, index) => (
-                                <motion.div
-                                  key={city}
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.8 }}
-                                  transition={{ duration: 0.2 }}
-                                >
-                                  <Badge
-                                    variant="secondary"
-                                    className="flex items-center gap-2 px-2 py-1 text-xs"
-                                  >
-                                    {city}
-                                    <X
-                                      className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                      onClick={() => handleRemoveCity(index)}
-                                    />
-                                  </Badge>
-                                </motion.div>
-                              ))}
-                            </AnimatePresence>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-xs font-medium text-white">
-                            Your email address
-                          </label>
-                          <div className="flex flex-col gap-2">
-                            {" "}
-                            <div className="relative min-h-[60px]">
-                              <Controller
-                                name="email"
-                                control={control}
-                                rules={{
-                                  required: "Email is required",
-                                  pattern: {
-                                    value:
-                                      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                                    message: "Invalid email format",
-                                  },
-                                }}
-                                render={({ field }) => (
-                                  <Input
-                                    {...field}
-                                    type="email"
-                                    placeholder="name@example.com"
-                                    className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
-                                  />
-                                )}
-                              />
-                              {errors.email && (
-                                <p className="absolute bottom-[-5px] text-xs text-red-500">
-                                  {errors.email.message}
-                                </p>
-                              )}
-                            </div>
-                            <Button
-                              className="whitespace text-sm"
-                              type="submit"
-                            >
-                              <Mail className="mr-2 h-4 w-4" />
-                              Get Booking Requests
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </form>
-
-
-                */}
             </div>
           </div>
         </div>
         {/* Right side - Newsletter Signup (Mobile) - Now outside the image div */}
 
         <div className="relative -mt-4">
-          {" "}
-          {/* Keep this div wrapping the toggle and map/name-price section */}
           {/* Original Booking Toggle */}
           <div
-            ref={toggleSectionRef} // <----  ENSURE ref IS HERE!
+            ref={toggleSectionRef}
             className={`mx-auto mb-6 max-w-sm transition-all duration-300 md:max-w-md lg:max-w-2xl ${
               hasPassedButtons ? "opacity-0" : "opacity-100"
             }`}
@@ -424,6 +279,16 @@ export default function MastHead() {
         <div className="mx-auto mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
+          <div className="flex flex-col items-center">
+            <div className="mb-12 text-center">
+              <h2 className="mx-1 text-2xl font-semibold text-[#000000] lg:text-3xl">
+                Requests are coming in now. Sign up to get the bookings.
+              </h2>
+            </div>
+            <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
+              <RequestFeed requestFeed={requestFeed} />
+            </div>
+          </div>
 
           <HowTramonaWorks className="max-w-6xl" />
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
@@ -435,7 +300,7 @@ export default function MastHead() {
           <div className="mx-2 my-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
             {/* FAQ */}
             <section className="w-full space-y-8 bg-gray-50">
-              <h2 className="text-center text-3xl font-bold">
+              <h2 className="text-center text-3xl font-semibold text-[#000000]">
                 Frequently Asked Questions
               </h2>
               <Accordion
@@ -496,4 +361,6 @@ export default function MastHead() {
       </div>
     </AdjustedPropertiesProvider>
   );
-}
+};
+
+export default MastHead;

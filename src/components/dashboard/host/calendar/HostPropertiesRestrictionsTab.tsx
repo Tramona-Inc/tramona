@@ -19,10 +19,10 @@ export default function HostPropertiesRestrictionsTab({ property }: { property: 
         discountInfo={discountInfo}
         isLoadingDiscountInfo={isLoadingDiscountInfo}
       />
-      <StripeVerificationSection
+      {/* <StripeVerificationSection
         stripeVerRequired={property.stripeVerRequired ?? false}
         property={property}
-      />
+      /> */}
     </div>
   );
 }
