@@ -28,6 +28,10 @@ export const cities = [
   "Nashville",
   "Washington D.C.",
   "Philadelphia",
+  "Phoenix",
+  "Scottsdale",
+  "Mesa",
+  "Tempe"
 ];
 
 export function CityCarousel({ setLocation }: CityCarouselProps) {

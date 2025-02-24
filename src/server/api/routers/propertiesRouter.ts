@@ -758,7 +758,7 @@ export const propertiesRouter = createTRPCRouter({
       z.object({ currentHostTeamId: z.number(), city: z.string().optional() }),
     )
     .query(async ({ input }): Promise<SeparatedData> => {
-      console.log(input);
+      // console.log(input);
       const whereConditions = [
         eq(properties.hostTeamId, input.currentHostTeamId),
         eq(properties.status, "Listed"),
@@ -772,7 +772,7 @@ export const propertiesRouter = createTRPCRouter({
         where: and(...whereConditions),
       });
 
-      console.log(hostProperties);
+      // console.log(hostProperties);
 
       const hostRequests = await getRequestsForProperties(hostProperties);
 
@@ -812,7 +812,7 @@ export const propertiesRouter = createTRPCRouter({
         }
       >();
 
-      console.log(hostRequests);
+      // console.log(hostRequests);
 
       // Loop through requests and group properties by request
       for (const { property, request } of hostRequests) {
@@ -826,7 +826,7 @@ export const propertiesRouter = createTRPCRouter({
         requestsMap.get(request.id)!.properties.push(property);
       }
 
-      console.log(requestsMap);
+      // console.log(requestsMap);
 
       // Process each request and validate properties
       for (const requestWithProperties of requestsMap.values()) {
@@ -1374,7 +1374,7 @@ export const propertiesRouter = createTRPCRouter({
       // Query for scraped properties with non-intersecting dates
       const scrapedProperties = await db.query.properties.findMany({
         where: and(
-          eq(properties.originalListingPlatform, "Casamundo"),
+          or(eq(properties.originalListingPlatform, "Casamundo"), eq(properties.originalListingPlatform, "Evolve")),
           propertyIsNearRequest,
           ne(properties.originalNightlyPrice, -1),
           isNotNull(properties.originalNightlyPrice),
