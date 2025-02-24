@@ -27,7 +27,7 @@ export default function StripeVerificationSection({
   const handleSave = async () => {
     try {
       await updateProperty({
-        updatedProperty: { ...property, stripeVerRequired: value === "yes" },
+        updatedProperty: { id: property.id, stripeVerRequired: value === "yes" },
         currentHostTeamId: currentHostTeamId!,
       })
       toast({ title: "Property Updated!" })

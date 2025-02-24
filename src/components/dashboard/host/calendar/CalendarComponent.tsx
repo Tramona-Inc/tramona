@@ -206,50 +206,6 @@ export default function CalendarComponent() {
 
   const [isCalendarUpdating, setIsCalendarUpdating] = useState(false);
 
-  const { mutateAsync: toggleBookItNow, isLoading: isTogglingBookItNow } =
-    api.properties.toggleBookItNow.useMutation();
-
-  const { mutateAsync: updateBookItNow, isLoading: isUpdatingBookItNow } =
-    api.properties.updateBookItNow.useMutation();
-
-  const handleBookItNowSwitch = (checked: boolean) => {
-    return toggleBookItNow({
-      id: selectedProperty!.id,
-      bookItNowEnabled: checked,
-      currentHostTeamId: currentHostTeamId!,
-    })
-      .then(() => {
-        setIsBookItNowChecked(checked);
-        toast({
-          title: "Update Successful",
-          description: `Book it now ${checked ? "enabled" : "disabled"}`,
-        });
-      })
-      .catch((error: TRPCClientErrorLike<AppRouter>) => {
-        setIsBookItNowChecked((prev) => !checked);
-        if (error.data?.code === "FORBIDDEN") {
-          toast({
-            title: "You do not have permission to change Co-host roles.",
-            description: "Please contact your team owner to request access.",
-          });
-        } else {
-          errorToast();
-        }
-      });
-  };
-
-  const handleBookItNowSlider = async (bookItNowPercent: number) => {
-    setIsCalendarUpdating(true);
-    await updateBookItNow({
-      id: selectedProperty!.id,
-      bookItNowHostDiscountPercentOffInput: bookItNowPercent,
-      currentHostTeamId: currentHostTeamId!,
-    }).finally(() => {
-      setIsCalendarUpdating(false);
-    });
-    return bookItNowPercent;
-  };
-
   const isLoading = loadingProperties || loadingPrices;
 
   return (
@@ -406,9 +362,6 @@ export default function CalendarComponent() {
         {selectedProperty ? (
           <CalendarSettings
             property={selectedProperty}
-            handleBookItNowSwitch={handleBookItNowSwitch}
-            handleBookItNowSlider={handleBookItNowSlider}
-            isTogglingBookItNow={isTogglingBookItNow}
             isBookItNowChecked={isBookItNowChecked}
             refetch={refetch} // sorry this is to invalidate the queries after the pricing update
           />

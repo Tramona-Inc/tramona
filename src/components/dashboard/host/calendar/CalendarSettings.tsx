@@ -8,18 +8,12 @@ import { useRouter } from "next/router";
 import PricingTab from "./PricingTab";
 interface CalendarSettingsProps {
   property: Property;
-  handleBookItNowSwitch: (checked: boolean) => Promise<void>;
-  handleBookItNowSlider: (bookItNowPercent: number) => Promise<number>;
   isBookItNowChecked: boolean;
-  isTogglingBookItNow: boolean;
   refetch: () => void;
 }
 export default function CalendarSettings({
   property,
-  handleBookItNowSwitch,
-  handleBookItNowSlider,
   isBookItNowChecked,
-  isTogglingBookItNow,
   refetch,
 }: CalendarSettingsProps) {
   // const { currentHostTeamId } = useHostTeamStore();
@@ -146,12 +140,7 @@ export default function CalendarSettings({
             {/* Book it now section */}
             <PricingTab
               property={property}
-              handleBookItNowSlider={handleBookItNowSlider}
-              handleBookItNowSwitch={handleBookItNowSwitch}
               isBookItNowChecked={isBookItNowChecked}
-              isTogglingBookItNow={isTogglingBookItNow}
-              bookItNowPercent={bookItNowPercent}
-              setBookItNowPercent={setBookItNowPercent}
               biddingPercent={biddingPercent}
               setBiddingPercent={setBiddingPercent}
             />
