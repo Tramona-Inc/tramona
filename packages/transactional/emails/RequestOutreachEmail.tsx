@@ -22,8 +22,8 @@ interface RequestOutreachEmailProps {
   notes?: string;
   maximumPerNightAmount?: number;
   requestDates?: string; // Added requestDates prop
-  hostDashboardLink: string; // Added hostDashboardLink prop
-  calendlyLink: string; // Added calendlyLink prop
+  // hostDashboardLink: string; // Added hostDashboardLink prop
+  // calendlyLink: string; // Added calendlyLink prop
 }
 
 export default function RequestOutreachEmail({
@@ -33,8 +33,8 @@ export default function RequestOutreachEmail({
   notes,
   maximumPerNightAmount = 300,
   requestDates = "October 26-27", // Default date placeholder, you should make this dynamic
-  hostDashboardLink = "[Link to Host Dashboard/Requests Page]", // Placeholder for Host Dashboard Link
-  calendlyLink = "[Your Calendly Link Here]", // Placeholder for Calendly Link
+  // hostDashboardLink = "[Link to Host Dashboard/Requests Page]", // Placeholder for Host Dashboard Link
+  // calendlyLink = "[Your Calendly Link Here]", // Placeholder for Calendly Link
 }: RequestOutreachEmailProps) {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
@@ -136,9 +136,9 @@ export default function RequestOutreachEmail({
         </Text>
         <Text style={helpText}>
           Or schedule a quick call with our Host Support team:{" "}
-          <Link href={calendlyLink} style={link}>
+          {/* <Link href={calendlyLink} style={link}>
             [Your Calendly Link Here]
-          </Link>
+          </Link> */}
         </Text>
         <Text style={{ ...helpText, marginBottom: "32px" }}>
           (Copy and paste this link to schedule a call)
