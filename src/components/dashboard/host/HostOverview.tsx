@@ -186,23 +186,25 @@ export default function HostOverview() {
                         Discount Preferences
                       </Label>
                       <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                        At 0% off, your current price is equal to your Airbnb
-                        price, with less fees. These sliders determine which
-                        booking{" "}
-                        <strong className="text-black">
-                          requests you receive and consider.
-                        </strong>
+                        At 0% discount, your price on Tramona matches your
+                        Airbnb price, but with lower fees. Use the sliders to
+                        set the maximum discount you&apos;re willing to offer
+                        off your Airbnb price, which determines the lowest price
+                        per night you would consider accepting.
                       </p>
                     </div>
 
                     <div className="rounded-lg bg-gray-50 p-3">
                       <p className="font-medium text-gray-900">
-                        We generally recommend:
+                        We recommend the following to increase occupancy 5-10%:
                       </p>
                       <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-gray-600">
-                        <li>3-5% discount for Friday and Saturday bookings</li>
+                        <li>0-3% discount for Friday and Saturday bookings</li>
                         <li>
-                          5-10% discount for Sunday through Thursday bookings
+                          3-8% discount for Sunday through Thursday bookings
+                        </li>
+                        <li>
+                          During the off season we suggest around 7-10% off
                         </li>
                       </ul>
                     </div>
