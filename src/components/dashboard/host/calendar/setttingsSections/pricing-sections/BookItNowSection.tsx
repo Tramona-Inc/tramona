@@ -2,65 +2,63 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
+import type { Property } from "@/server/db/schema";
+
+type MutationContext = {
+  previousProperty: Property | undefined;
+};
 
 export default function BookItNowSection({
   isBookItNowChecked: initialBookItNowChecked,
   propertyId,
+  onLoadingChange,
 }: {
   isBookItNowChecked: boolean;
   propertyId: number;
+  onLoadingChange: (isLoading: boolean) => void;
 }) {
   const { currentHostTeamId } = useHostTeamStore();
   const utils = api.useContext();
-
-  const [isTogglingBookItNow, setIsTogglingBookItNow] = React.useState(false);
-  const [isUpdatingSlider, setIsUpdatingSlider] = React.useState(false);
+  const [isRecovering, setIsRecovering] = useState(false);
 
   const { mutate: update } = api.properties.update.useMutation({
     onMutate: async (newData) => {
-      // Track which type of update is happening
-      const isToggleUpdate = "bookItNowEnabled" in newData.updatedProperty;
-      if (isToggleUpdate) {
-        setIsTogglingBookItNow(true);
-      } else {
-        setIsUpdatingSlider(true);
-      }
-
+      onLoadingChange(true);
+      setIsRecovering(false);
       await utils.properties.getById.cancel({ id: propertyId });
 
       const previousProperty = utils.properties.getById.getData({
         id: propertyId,
-      });
+      }) as Property | undefined;
 
       if (previousProperty) {
-        utils.properties.getById.setData(
-          { id: propertyId },
-          {
-            ...previousProperty,
-            ...newData.updatedProperty,
-          },
+        utils.properties.getById.setData({ id: propertyId }, (old) =>
+          old ? { ...old, ...newData.updatedProperty } : old,
         );
       }
 
-      return { previousProperty, isToggleUpdate };
+      return { previousProperty };
     },
-    onError: (err, newData, context) => {
-      utils.properties.getById.setData(
-        { id: propertyId },
-        context?.previousProperty,
-      );
-
-      if ("bookItNowEnabled" in newData.updatedProperty) {
-        setLocalBookItNowChecked(!newData.updatedProperty.bookItNowEnabled);
+    onError: (err, _newData, context: MutationContext | undefined) => {
+      setIsRecovering(true);
+      if (context?.previousProperty) {
+        utils.properties.getById.setData({ id: propertyId }, (old) =>
+          old ? { ...context.previousProperty, ...old } : old,
+        );
       }
-      if ("bookItNowHostDiscountPercentOffInput" in newData.updatedProperty) {
+
+      // Roll back local state based on what was being updated
+      if ("bookItNowEnabled" in _newData.updatedProperty) {
+        setLocalBookItNowChecked(!_newData.updatedProperty.bookItNowEnabled);
+      }
+      if ("bookItNowHostDiscountPercentOffInput" in _newData.updatedProperty) {
         setLocalSliderValue(previousValue);
         setIsError(true);
       }
@@ -84,13 +82,9 @@ export default function BookItNowSection({
         });
       }
     },
-    onSettled: (_, __, ___, context) => {
-      // Reset appropriate loading state
-      if (context?.isToggleUpdate) {
-        setIsTogglingBookItNow(false);
-      } else {
-        setIsUpdatingSlider(false);
-      }
+    onSettled: () => {
+      onLoadingChange(false);
+      setIsRecovering(false);
       void utils.properties.getById.invalidate({ id: propertyId });
     },
   });
@@ -105,21 +99,23 @@ export default function BookItNowSection({
     React.useState(false);
 
   // Query to get the initial book it now percent
-  const { data: property } = api.properties.getById.useQuery(
-    { id: propertyId },
-    {
-      onSuccess: (data) => {
-        if (
-          !hasUserModifiedSlider &&
-          !isUpdatingSlider &&
-          !isTogglingBookItNow
-        ) {
-          setLocalSliderValue(data.bookItNowHostDiscountPercentOffInput);
-          setPreviousValue(data.bookItNowHostDiscountPercentOffInput);
-        }
+  const { data: property, isLoading: isLoadingProperty } =
+    api.properties.getById.useQuery(
+      { id: propertyId },
+      {
+        onSuccess: (data) => {
+          if (!hasUserModifiedSlider && !isRecovering) {
+            setLocalSliderValue(data.bookItNowHostDiscountPercentOffInput);
+            setPreviousValue(data.bookItNowHostDiscountPercentOffInput);
+          }
+        },
       },
-    },
-  );
+    );
+
+  // Notify parent of loading state changes
+  useEffect(() => {
+    onLoadingChange(isLoadingProperty);
+  }, [isLoadingProperty, onLoadingChange]);
 
   const handleBookItNowSwitch = (checked: boolean) => {
     setLocalBookItNowChecked(checked); // Optimistic update
@@ -169,10 +165,8 @@ export default function BookItNowSection({
         </p>
         <Switch
           checked={localBookItNowChecked}
-          disabled={isTogglingBookItNow}
           className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300"
           onCheckedChange={handleBookItNowSwitch}
-          style={{ cursor: isTogglingBookItNow ? "wait" : "pointer" }}
         />
       </div>
 
@@ -198,13 +192,13 @@ export default function BookItNowSection({
             <div className="flex justify-end">
               <Button
                 onClick={handleBookItNowSliderLocal}
-                disabled={!hasChanges || isUpdatingSlider}
+                disabled={!hasChanges || isRecovering}
                 variant={isError ? "destructive" : "primary"}
               >
                 {isError
                   ? "Try Again"
-                  : isUpdatingSlider
-                    ? "Please wait..."
+                  : isRecovering
+                    ? "Recovering..."
                     : hasChanges
                       ? "Save"
                       : "Saved"}

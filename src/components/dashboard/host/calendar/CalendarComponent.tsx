@@ -27,12 +27,7 @@ import {
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import CalenderSettingsLoadingState from "./CalenderSettingsLoadingState";
-import { toast } from "@/components/ui/use-toast";
-import { errorToast } from "@/utils/toasts";
-import { TRPCClientErrorLike } from "@trpc/client";
-import { AppRouter } from "@/server/api/root";
 import CalendarLegend from "./CalendarLegend";
-import HowYourCalendarWorksModal from "../HowYourCalendarWorks";
 import { useSession } from "next-auth/react";
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
@@ -48,6 +43,7 @@ export default function CalendarComponent() {
   const [calOpen, setCalOpen] = useState(false);
   const [howYourCalendarWorksOpen, setHowYourCalendarWorksOpen] =
     useState(false);
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
 
   const {
     data: hostProperties,
@@ -342,6 +338,7 @@ export default function CalendarComponent() {
                 isCalendarUpdating={isCalendarUpdating}
                 setHowYourCalendarWorksOpen={setHowYourCalendarWorksOpen}
                 hostProperties={hostProperties ?? []}
+                isPriceLoading={isPriceLoading}
               />
 
               <div className="my-6 flex w-full flex-col items-center justify-between gap-x-4 gap-y-3 md:flex-row 2xl:mx-8">
@@ -363,6 +360,7 @@ export default function CalendarComponent() {
           <CalendarSettings
             property={selectedProperty}
             isBookItNowChecked={isBookItNowChecked}
+            onPriceLoadingChange={setIsPriceLoading}
           />
         ) : (
           <CalenderSettingsLoadingState />

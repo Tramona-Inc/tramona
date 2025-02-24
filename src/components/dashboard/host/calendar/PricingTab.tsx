@@ -7,17 +7,20 @@ export default function PricingTab({
   isBookItNowChecked,
   biddingPercent,
   setBiddingPercent,
+  onPriceLoadingChange,
 }: {
   property: Property;
   isBookItNowChecked: boolean;
   biddingPercent: number;
   setBiddingPercent: (percent: number) => void;
+  onPriceLoadingChange: (isLoading: boolean) => void;
 }) {
   return (
     <>
       <BookItNowSection
         isBookItNowChecked={isBookItNowChecked}
         propertyId={property.id}
+        onLoadingChange={onPriceLoadingChange}
       />
 
       {/* Bidding section */}

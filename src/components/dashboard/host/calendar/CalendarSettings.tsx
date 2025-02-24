@@ -9,10 +9,12 @@ import PricingTab from "./PricingTab";
 interface CalendarSettingsProps {
   property: Property;
   isBookItNowChecked: boolean;
+  onPriceLoadingChange: (isLoading: boolean) => void;
 }
 export default function CalendarSettings({
   property,
   isBookItNowChecked,
+  onPriceLoadingChange,
 }: CalendarSettingsProps) {
   // const { currentHostTeamId } = useHostTeamStore();
 
@@ -40,6 +42,7 @@ export default function CalendarSettings({
   );
 
   console.log("biddingPercent", biddingPercent);
+
 
   useEffect(() => {
     setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
@@ -135,10 +138,10 @@ export default function CalendarSettings({
           </TabsList>
 
           <TabsContent value="pricing" className="space-y-6">
-            {/* Book it now section */}
             <PricingTab
               property={property}
               isBookItNowChecked={isBookItNowChecked}
+              onPriceLoadingChange={onPriceLoadingChange}
               biddingPercent={biddingPercent}
               setBiddingPercent={setBiddingPercent}
             />
