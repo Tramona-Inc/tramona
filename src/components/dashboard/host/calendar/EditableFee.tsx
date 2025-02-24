@@ -20,8 +20,11 @@ interface EditableFeeProps {
   learnMoreLink?: string;
   helpText?: string;
   showGuestCounter?: boolean;
-  refetch: () => void;
 }
+
+type MutationContext = {
+  previousProperty: Property | undefined;
+};
 
 export default function EditableFee({
   property,
@@ -31,44 +34,33 @@ export default function EditableFee({
   helpText,
   learnMoreLink,
   showGuestCounter = false,
-  refetch,
 }: EditableFeeProps) {
   const { currentHostTeamId } = useHostTeamStore();
   const utils = api.useContext();
 
-  const { mutate: updatePricingField, isLoading } =
-    api.properties.updatePropertyPricingField.useMutation({
+  const { mutate: update, isLoading: isUpdating } =
+    api.properties.update.useMutation({
       onMutate: async (newData) => {
-        // Cancel outgoing refetches
         await utils.properties.getById.cancel({ id: property.id });
 
-        // Snapshot the previous value
         const previousProperty = utils.properties.getById.getData({
           id: property.id,
         });
 
-        // Optimistically update the UI
         if (previousProperty) {
-          utils.properties.getById.setData(
-            { id: property.id },
-            {
-              ...previousProperty,
-              [field]: newData.amount,
-              ...(showGuestCounter && {
-                maxGuestsWithoutFee: newData.maxGuestsWithoutFee,
-              }),
-            },
+          utils.properties.getById.setData({ id: property.id }, (old) =>
+            old ? { ...old, ...newData.updatedProperty } : old,
           );
         }
 
-        return { previousProperty };
+        return { previousProperty } as MutationContext;
       },
-      onError: (err, newData, context) => {
-        // Revert the optimistic update on error
-        utils.properties.getById.setData(
-          { id: property.id },
-          context?.previousProperty,
-        );
+      onError: (err, _newData, context: MutationContext | undefined) => {
+        if (context?.previousProperty) {
+          utils.properties.getById.setData({ id: property.id }, (old) =>
+            old ? { ...context.previousProperty, ...old } : old,
+          );
+        }
         setEditValue(String(initialValue / 100));
         if (showGuestCounter) {
           setEditGuestCount(
@@ -94,7 +86,6 @@ export default function EditableFee({
         setIsEditing(false);
       },
       onSettled: () => {
-        // Invalidate the query to ensure we have the latest data
         void utils.properties.getById.invalidate({ id: property.id });
       },
     });
@@ -120,12 +111,15 @@ export default function EditableFee({
       return;
     }
 
-    updatePricingField({
+    update({
+      updatedProperty: {
+        id: property.id,
+        [field]: parsedValue * 100,
+        ...(showGuestCounter && {
+          maxGuestsWithoutFee: editGuestCount,
+        }),
+      },
       currentHostTeamId: currentHostTeamId!,
-      propertyId: property.id,
-      field: field,
-      amount: parsedValue * 100, // convert dollar into cents
-      maxGuestsWithoutFee: editGuestCount,
     });
   };
 
@@ -137,7 +131,6 @@ export default function EditableFee({
 
   const handleEditValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // allow only numbers and decimal point
     if (/^\d*\.?\d*$/.test(value)) {
       setEditValue(value);
     }
@@ -201,7 +194,7 @@ export default function EditableFee({
 
         <div className="space-y-2">
           <Button className="w-full" onClick={handleSave}>
-            {isLoading ? "Saving..." : "Save"}
+            {isUpdating ? "Saving..." : "Save"}
           </Button>
           <Button variant="outline" className="w-full" onClick={handleCancel}>
             Cancel

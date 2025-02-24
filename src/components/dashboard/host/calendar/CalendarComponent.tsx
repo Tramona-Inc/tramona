@@ -363,7 +363,6 @@ export default function CalendarComponent() {
           <CalendarSettings
             property={selectedProperty}
             isBookItNowChecked={isBookItNowChecked}
-            refetch={refetch} // sorry this is to invalidate the queries after the pricing update
           />
         ) : (
           <CalenderSettingsLoadingState />

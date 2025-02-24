@@ -9,12 +9,10 @@ import PricingTab from "./PricingTab";
 interface CalendarSettingsProps {
   property: Property;
   isBookItNowChecked: boolean;
-  refetch: () => void;
 }
 export default function CalendarSettings({
   property,
   isBookItNowChecked,
-  refetch,
 }: CalendarSettingsProps) {
   // const { currentHostTeamId } = useHostTeamStore();
 
@@ -146,7 +144,7 @@ export default function CalendarSettings({
             />
           </TabsContent>
           <TabsContent value="fees" className="space-y-6 sm:space-y-8">
-            <HostFeeTab property={property} refetch={refetch} />
+            <HostFeeTab property={property} />
           </TabsContent>
           <TabsContent value="restrictions" className="space-y-6 sm:space-y-8">
             <HostPropertiesRestrictionsTab property={property} />
