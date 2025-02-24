@@ -6,10 +6,8 @@ import { Property } from "@/server/db/schema/tables/properties";
 
 export default function HostFeeTab({
   property,
-  refetch,
 }: {
   property: Property;
-  refetch: () => void;
 }) {
   const [feesOpen, setFeesOpen] = useState(false);
 
@@ -43,7 +41,6 @@ export default function HostFeeTab({
               field="cleaningFeePerStay"
               subtitle="Per stay"
               title={"Cleaning fee"}
-              refetch={refetch}
             />
           </section>
 
@@ -53,7 +50,6 @@ export default function HostFeeTab({
               field="petFeePerStay"
               title="Pet fee"
               subtitle="Per stay"
-              refetch={refetch}
             />
           </section>
 
@@ -64,7 +60,6 @@ export default function HostFeeTab({
               title="Extra guest fee"
               subtitle="Per night"
               showGuestCounter
-              refetch={refetch}
             />
           </section>
         </div>

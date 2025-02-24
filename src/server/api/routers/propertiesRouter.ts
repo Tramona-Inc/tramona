@@ -744,21 +744,12 @@ export const propertiesRouter = createTRPCRouter({
       return allProperties;
     }),
 
-  updatePropertyDatesLastUpdated: hostProcedure
-    .input(z.object({ propertyId: z.number(), datesLastUpdated: z.date() }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(properties)
-        .set({ datesLastUpdated: input.datesLastUpdated })
-        .where(eq(properties.id, input.propertyId));
-    }),
-
   getHostPropertiesWithRequests: hostProcedure
     .input(
       z.object({ currentHostTeamId: z.number(), city: z.string().optional() }),
     )
     .query(async ({ input }): Promise<SeparatedData> => {
-      console.log(input);
+      // console.log(input);
       const whereConditions = [
         eq(properties.hostTeamId, input.currentHostTeamId),
         eq(properties.status, "Listed"),
@@ -772,7 +763,7 @@ export const propertiesRouter = createTRPCRouter({
         where: and(...whereConditions),
       });
 
-      console.log(hostProperties);
+      // console.log(hostProperties);
 
       const hostRequests = await getRequestsForProperties(hostProperties);
 
@@ -812,7 +803,7 @@ export const propertiesRouter = createTRPCRouter({
         }
       >();
 
-      console.log(hostRequests);
+      // console.log(hostRequests);
 
       // Loop through requests and group properties by request
       for (const { property, request } of hostRequests) {
@@ -826,7 +817,7 @@ export const propertiesRouter = createTRPCRouter({
         requestsMap.get(request.id)!.properties.push(property);
       }
 
-      console.log(requestsMap);
+      // console.log(requestsMap);
 
       // Process each request and validate properties
       for (const requestWithProperties of requestsMap.values()) {
@@ -1043,44 +1034,6 @@ export const propertiesRouter = createTRPCRouter({
         })
         .where(eq(properties.id, input.id));
     }),
-
-  toggleBookItNow: coHostProcedure(
-    "modify_overall_pricing_strategy",
-    z.object({
-      id: z.number(),
-      bookItNowEnabled: z.boolean(),
-      currentHostTeamId: z.number(),
-    }),
-  ).mutation(async ({ ctx, input }) => {
-    const [updatedProperty] = await ctx.db
-      .update(properties)
-      .set({
-        bookItNowEnabled: input.bookItNowEnabled,
-      })
-      .where(eq(properties.id, input.id))
-      .returning({ bookItNowEnabled: properties.bookItNowEnabled });
-
-    return updatedProperty?.bookItNowEnabled ? true : false;
-  }),
-
-  updateBookItNow: coHostProcedure(
-    "modify_overall_pricing_strategy",
-    z.object({
-      id: z.number(),
-      bookItNowHostDiscountPercentOffInput: z.number().optional(),
-      currentHostTeamId: z.number(),
-    }),
-  ).mutation(async ({ ctx, input }) => {
-    await ctx.db
-      .update(properties)
-      .set({
-        ...(input.bookItNowHostDiscountPercentOffInput !== undefined && {
-          bookItNowHostDiscountPercentOffInput:
-            input.bookItNowHostDiscountPercentOffInput,
-        }),
-      })
-      .where(eq(properties.id, input.id));
-  }),
 
   updatePropertyDiscountTiers: protectedProcedure
     .input(
@@ -1374,7 +1327,7 @@ export const propertiesRouter = createTRPCRouter({
       // Query for scraped properties with non-intersecting dates
       const scrapedProperties = await db.query.properties.findMany({
         where: and(
-          eq(properties.originalListingPlatform, "Casamundo"),
+          or(eq(properties.originalListingPlatform, "Casamundo"), eq(properties.originalListingPlatform, "Evolve")),
           propertyIsNearRequest,
           ne(properties.originalNightlyPrice, -1),
           isNotNull(properties.originalNightlyPrice),
@@ -1442,41 +1395,4 @@ export const propertiesRouter = createTRPCRouter({
 
     return property;
   }),
-
-  updatePropertyPricingField: coHostProcedure(
-    "modify_overall_pricing_strategy",
-    z.object({
-      propertyId: z.number(),
-      field: extraPricingFieldSchema,
-      amount: z.number(),
-      maxGuestsWithoutFee: z.number().optional(),
-    }),
-  ).mutation(async ({ ctx, input }) => {
-    console.log(input);
-    const field = input.field;
-    await db
-      .update(properties)
-      .set({
-        ...(input.maxGuestsWithoutFee && {
-          maxGuestsWithoutFee: input.maxGuestsWithoutFee,
-        }),
-        [field]: input.amount,
-      })
-      .where(eq(properties.id, input.propertyId));
-    return;
-  }),
-
-  updatePropertyStatus: publicProcedure
-    .input(
-      z.object({
-        propertyId: z.number(),
-        status: z.enum(["Listed", "Drafted", "Archived"]),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      await db
-        .update(properties)
-        .set({ status: input.status })
-        .where(eq(properties.id, input.propertyId));
-    }),
 });

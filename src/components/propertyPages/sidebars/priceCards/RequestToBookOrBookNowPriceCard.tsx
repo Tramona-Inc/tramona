@@ -213,8 +213,7 @@ export default function RequestToBookOrBookNowPriceCard({
       [
         {
           price:
-            propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes! /
-            numOfNights, // Buy Now price is the full price
+            propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes!, // Buy Now price is the full price
           label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
           percentOff: 0, // 0% off for original price
         },
@@ -586,17 +585,15 @@ export default function RequestToBookOrBookNowPriceCard({
                         const discountedBasePricePerNight =
                           calculatedTravelerPricePerNightWithoutFees! *
                           ((100 - option.percentOff) / 100);
-                        const finalPricePerNight =
-                          discountedBasePricePerNight +
-                          propertyPricing.additionalFees.totalAdditionalFees /
-                            numOfNights + // Original fees per night
+                        // Calculate the total price instead of per night price
+                        const totalPrice =
+                          discountedBasePricePerNight * numOfNights +
+                          propertyPricing.additionalFees.totalAdditionalFees +
                           (propertyPricing.brokedownPaymentOutput
-                            ?.stripeTransactionFee ?? 0) /
-                            numOfNights + // Stripe fee per night
+                            ?.stripeTransactionFee ?? 0) +
                           (propertyPricing.brokedownPaymentOutput
-                            ?.superhogFee ?? 0) /
-                            numOfNights; // Superhog fee per night
-                        return finalPricePerNight;
+                            ?.superhogFee ?? 0);
+                        return totalPrice;
                       })(),
                     )}
                   </div>
@@ -626,13 +623,11 @@ export default function RequestToBookOrBookNowPriceCard({
                           discountedPriceInfo.finalDiscountedTravelerPrice !==
                           undefined
                             ? formatCurrency(
-                                discountedPriceInfo.finalDiscountedTravelerPrice /
-                                  numOfNights,
-                              ) // Display FINAL discounted price PER NIGHT
+                                discountedPriceInfo.finalDiscountedTravelerPrice,
+                              ) // Display TOTAL discounted price (not per night)
                             : formatCurrency(
-                                propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes! /
-                                  numOfNights,
-                              ) // Display ORIGINAL full price PER NIGHT when not discounted
+                                propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes!,
+                              ) // Display TOTAL original price when not discounted
                         }
                         onChange={handleRequestChange}
                         onBlur={handleRequestBlur}
@@ -641,7 +636,7 @@ export default function RequestToBookOrBookNowPriceCard({
                         onKeyDown={handleKeyDown}
                       />
                       <p className="text-xs italic leading-tight text-muted-foreground">
-                        per night
+                        total
                       </p>
                     </div>
                     {errorState.priceRequired && (
@@ -802,9 +797,9 @@ export default function RequestToBookOrBookNowPriceCard({
                     </span>
                   )}
                 </div>
-                <span className="mt-2 text-xl text-muted-foreground sm:ml-2 sm:mt-0">
+                {/* <span className="mt-2 text-xl text-muted-foreground sm:ml-2 sm:mt-0">
                   Per Night
-                </span>
+                </span> */}
               </div>
               {property.randomPercentageForScrapedProperties && (
                 <div className="my-3 text-xs md:text-sm">
