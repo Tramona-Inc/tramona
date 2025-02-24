@@ -1,7 +1,7 @@
 // MonthCalendar.tsx
 import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/utils/utils";
-import { AlertCircleIcon, Loader2Icon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon, Loader2 } from "lucide-react";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { Property } from "@/server/db/schema/tables/properties";
 
@@ -28,6 +28,7 @@ interface MonthCalendarProps {
   isCalendarUpdating?: boolean;
   setHowYourCalendarWorksOpen?: (open: boolean) => void;
   hostProperties: Property[];
+  isPriceLoading: boolean;
 }
 
 export default function MonthCalendar({
@@ -39,6 +40,7 @@ export default function MonthCalendar({
   isCalendarUpdating = false,
   setHowYourCalendarWorksOpen,
   hostProperties,
+  isPriceLoading = false,
 }: MonthCalendarProps) {
   console.log(prices);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -114,6 +116,44 @@ export default function MonthCalendar({
       : 0;
   }, [selectedProperty]);
 
+  const renderPrice = (price: number | undefined, isGrayedOut: boolean) => {
+    if (isLoading || isCalendarUpdating) {
+      return (
+        <Loader2Icon size={20} className="mx-auto animate-spin text-accent" />
+      );
+    }
+
+    if (price === undefined || isNaN(price) || isGrayedOut) {
+      return "";
+    }
+
+    const discountedPrice = price * (1 - getBookItNowDiscount / 100);
+
+    return (
+      <div className="flex flex-col items-center gap-1 text-xs md:flex-row md:text-base">
+        {selectedProperty?.bookItNowEnabled && getBookItNowDiscount > 0 && (
+          <span className="text-xs text-gray-500 line-through">
+            ${price.toFixed(0)}
+          </span>
+        )}
+        <span
+          className={cn(
+            "flex items-center gap-1 text-xs md:text-sm",
+            selectedProperty?.bookItNowEnabled && getBookItNowDiscount > 0
+              ? "text-green-600"
+              : "text-black",
+          )}
+        >
+          {isPriceLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-green-600" />
+          ) : (
+            `$${discountedPrice.toFixed(0)}`
+          )}
+        </span>
+      </div>
+    );
+  };
+
   const renderMonth = () => {
     const monthDays = generateCalendarDays(date);
 
@@ -151,12 +191,6 @@ export default function MonthCalendar({
             if (newBookedInfo) {
               reservationClass = "bg-reserved-pattern-3";
             }
-            const price =
-              currentDate &&
-              prices[currentDate.toISOString().split("T")[0] ?? ""];
-
-            const discountedPrice = //we need to make sure that book it now it enabled too
-              price && price * (1 - getBookItNowDiscount / 100);
 
             return (
               <div
@@ -176,7 +210,7 @@ export default function MonthCalendar({
                     : "text-muted-foreground",
                 )}
               >
-                <div className="flex items-center gap-x-1 absolute left-0 top-0 rounded-full bg-red-500 px-1 text-[0.6rem] text-white">
+                <div className="absolute left-0 top-0 flex items-center gap-x-1 rounded-full bg-red-500 px-1 text-[0.6rem] text-white">
                   {/* If you comment this in, it will work only for unsynced properties */}
                   {newBookedInfo && !isGrayedOut && (
                     <div
@@ -192,48 +226,9 @@ export default function MonthCalendar({
                   <>
                     <span className="text-sm font-semibold">{day}</span>
                     <span className="mt-1 text-xs text-muted-foreground">
-                      {isCalendarUpdating ? (
-                        <Loader2Icon
-                          size={20}
-                          className="mx-auto animate-spin text-accent"
-                        />
-                      ) : (
-                        <>
-                          {isLoading ? (
-                            <Loader2Icon
-                              size={20}
-                              className="mx-auto animate-spin text-accent"
-                            />
-                          ) : (
-                            (() => {
-                              return price !== undefined && !isNaN(price!) ? (
-                                <div className="flex flex-col items-center gap-1 text-xs md:flex-row md:text-base">
-                                  {selectedProperty?.bookItNowEnabled &&
-                                    getBookItNowDiscount > 0 && (
-                                      <span className="text-xs text-gray-500 line-through">
-                                        ${price?.toFixed(0)}
-                                      </span>
-                                    )}
-                                  <span
-                                    className={cn(
-                                      "text-xs md:text-sm",
-                                      selectedProperty?.bookItNowEnabled &&
-                                        getBookItNowDiscount > 0
-                                        ? "text-green-600"
-                                        : "text-black",
-                                    )}
-                                  >
-                                    $
-                                    {discountedPrice?.toFixed(0) ??
-                                      (price ? price.toFixed(0) : "")}
-                                  </span>
-                                </div>
-                              ) : (
-                                ""
-                              );
-                            })()
-                          )}
-                        </>
+                      {renderPrice(
+                        prices[currentDate.toISOString().split("T")[0] ?? ""],
+                        isGrayedOut,
                       )}
                     </span>
                   </>

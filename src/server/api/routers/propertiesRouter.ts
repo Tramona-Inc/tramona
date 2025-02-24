@@ -744,15 +744,6 @@ export const propertiesRouter = createTRPCRouter({
       return allProperties;
     }),
 
-  updatePropertyDatesLastUpdated: hostProcedure
-    .input(z.object({ propertyId: z.number(), datesLastUpdated: z.date() }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(properties)
-        .set({ datesLastUpdated: input.datesLastUpdated })
-        .where(eq(properties.id, input.propertyId));
-    }),
-
   getHostPropertiesWithRequests: hostProcedure
     .input(
       z.object({ currentHostTeamId: z.number(), city: z.string().optional() }),
@@ -1043,44 +1034,6 @@ export const propertiesRouter = createTRPCRouter({
         })
         .where(eq(properties.id, input.id));
     }),
-
-  toggleBookItNow: coHostProcedure(
-    "modify_overall_pricing_strategy",
-    z.object({
-      id: z.number(),
-      bookItNowEnabled: z.boolean(),
-      currentHostTeamId: z.number(),
-    }),
-  ).mutation(async ({ ctx, input }) => {
-    const [updatedProperty] = await ctx.db
-      .update(properties)
-      .set({
-        bookItNowEnabled: input.bookItNowEnabled,
-      })
-      .where(eq(properties.id, input.id))
-      .returning({ bookItNowEnabled: properties.bookItNowEnabled });
-
-    return updatedProperty?.bookItNowEnabled ? true : false;
-  }),
-
-  updateBookItNow: coHostProcedure(
-    "modify_overall_pricing_strategy",
-    z.object({
-      id: z.number(),
-      bookItNowHostDiscountPercentOffInput: z.number().optional(),
-      currentHostTeamId: z.number(),
-    }),
-  ).mutation(async ({ ctx, input }) => {
-    await ctx.db
-      .update(properties)
-      .set({
-        ...(input.bookItNowHostDiscountPercentOffInput !== undefined && {
-          bookItNowHostDiscountPercentOffInput:
-            input.bookItNowHostDiscountPercentOffInput,
-        }),
-      })
-      .where(eq(properties.id, input.id));
-  }),
 
   updatePropertyDiscountTiers: protectedProcedure
     .input(
@@ -1442,41 +1395,4 @@ export const propertiesRouter = createTRPCRouter({
 
     return property;
   }),
-
-  updatePropertyPricingField: coHostProcedure(
-    "modify_overall_pricing_strategy",
-    z.object({
-      propertyId: z.number(),
-      field: extraPricingFieldSchema,
-      amount: z.number(),
-      maxGuestsWithoutFee: z.number().optional(),
-    }),
-  ).mutation(async ({ ctx, input }) => {
-    console.log(input);
-    const field = input.field;
-    await db
-      .update(properties)
-      .set({
-        ...(input.maxGuestsWithoutFee && {
-          maxGuestsWithoutFee: input.maxGuestsWithoutFee,
-        }),
-        [field]: input.amount,
-      })
-      .where(eq(properties.id, input.propertyId));
-    return;
-  }),
-
-  updatePropertyStatus: publicProcedure
-    .input(
-      z.object({
-        propertyId: z.number(),
-        status: z.enum(["Listed", "Drafted", "Archived"]),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      await db
-        .update(properties)
-        .set({ status: input.status })
-        .where(eq(properties.id, input.propertyId));
-    }),
 });

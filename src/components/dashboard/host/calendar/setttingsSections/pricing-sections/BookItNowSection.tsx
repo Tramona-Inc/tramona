@@ -2,64 +2,135 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { api } from "@/utils/api";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
+import { TRPCClientErrorLike } from "@trpc/client";
+import { AppRouter } from "@/server/api/root";
+import type { Property } from "@/server/db/schema";
+
+type MutationContext = {
+  previousProperty: Property | undefined;
+};
 
 export default function BookItNowSection({
-  isBookItNowChecked,
-  isTogglingBookItNow,
-  handleBookItNowSwitch,
-  handleBookItNowSlider,
-  bookItNowPercent,
-  setBookItNowPercent,
+  isBookItNowChecked: initialBookItNowChecked,
+  propertyId,
+  onLoadingChange,
 }: {
   isBookItNowChecked: boolean;
-  isTogglingBookItNow: boolean;
-  handleBookItNowSwitch: (checked: boolean) => Promise<void>;
-  handleBookItNowSlider: (bookItNowPercent: number) => Promise<number>;
-  bookItNowPercent: number;
-  setBookItNowPercent: (percent: number) => void;
+  propertyId: number;
+  onLoadingChange: (isLoading: boolean) => void;
 }) {
-  const [previousValue, setPreviousValue] = React.useState(bookItNowPercent);
+  const { currentHostTeamId } = useHostTeamStore();
+  const utils = api.useContext();
+  const [isRecovering, setIsRecovering] = useState(false);
+
+  const { mutate: update } = api.properties.update.useMutation({
+    onMutate: async (newData) => {
+      onLoadingChange(true);
+      setIsRecovering(false);
+      await utils.properties.getById.cancel({ id: propertyId });
+
+      const previousProperty = utils.properties.getById.getData({
+        id: propertyId,
+      }) as Property | undefined;
+
+      if (previousProperty) {
+        utils.properties.getById.setData({ id: propertyId }, (old) =>
+          old ? { ...old, ...newData.updatedProperty } : old,
+        );
+      }
+
+      return { previousProperty };
+    },
+    onError: (err, _newData, context: MutationContext | undefined) => {
+      setIsRecovering(true);
+      if (context?.previousProperty) {
+        utils.properties.getById.setData({ id: propertyId }, (old) =>
+          old ? { ...context.previousProperty, ...old } : old,
+        );
+      }
+
+      // Roll back local state based on what was being updated
+      if ("bookItNowEnabled" in _newData.updatedProperty) {
+        setLocalBookItNowChecked(!_newData.updatedProperty.bookItNowEnabled);
+      }
+      if ("bookItNowHostDiscountPercentOffInput" in _newData.updatedProperty) {
+        setLocalSliderValue(previousValue);
+        setIsError(true);
+      }
+
+      if ((err as TRPCClientErrorLike<AppRouter>).data?.code === "FORBIDDEN") {
+        toast({
+          title: "You do not have permission to change Co-host roles.",
+          description: "Please contact your team owner to request access.",
+        });
+      } else {
+        errorToast();
+      }
+    },
+    onSuccess: (_, variables) => {
+      if ("bookItNowHostDiscountPercentOffInput" in variables.updatedProperty) {
+        setHasUserModifiedSlider(false);
+        setIsError(false);
+        toast({
+          title: "Update Successful",
+          description: "Book it now discount updated",
+        });
+      }
+    },
+    onSettled: () => {
+      onLoadingChange(false);
+      setIsRecovering(false);
+      void utils.properties.getById.invalidate({ id: propertyId });
+    },
+  });
+
+  const [previousValue, setPreviousValue] = React.useState(0);
   const [isError, setIsError] = React.useState(false);
-  const [localBookItNowChecked, setLocalBookItNowChecked] =
-    React.useState(isBookItNowChecked);
-  const [localSliderValue, setLocalSliderValue] =
-    React.useState(bookItNowPercent);
-  const [isUpdatingSwitch, setIsUpdatingSwitch] = React.useState(false);
+  const [localBookItNowChecked, setLocalBookItNowChecked] = React.useState(
+    initialBookItNowChecked,
+  );
+  const [localSliderValue, setLocalSliderValue] = React.useState(0);
   const [hasUserModifiedSlider, setHasUserModifiedSlider] =
     React.useState(false);
 
-  // Only sync slider value with props on initial mount or when explicitly resetting
-  React.useEffect(() => {
-    // Don't sync if:
-    // 1. User has modified the slider OR
-    // 2. We're in the middle of toggling the switch
-    if (!hasUserModifiedSlider && !isUpdatingSwitch && !isTogglingBookItNow) {
-      setLocalSliderValue(bookItNowPercent);
-      setPreviousValue(bookItNowPercent);
-    }
-  }, [
-    bookItNowPercent,
-    isUpdatingSwitch,
-    hasUserModifiedSlider,
-    isTogglingBookItNow,
-  ]);
+  // Query to get the initial book it now percent
+  const { data: property, isLoading: isLoadingProperty } =
+    api.properties.getById.useQuery(
+      { id: propertyId },
+      {
+        onSuccess: (data) => {
+          if (!hasUserModifiedSlider && !isRecovering) {
+            setLocalSliderValue(data.bookItNowHostDiscountPercentOffInput);
+            setPreviousValue(data.bookItNowHostDiscountPercentOffInput);
+          }
+        },
+      },
+    );
 
-  const handleSwitchChange = async (checked: boolean) => {
-    setIsUpdatingSwitch(true);
-    setLocalBookItNowChecked(checked);
-    try {
-      await handleBookItNowSwitch(checked);
-      // Only reset slider if turning OFF book it now
-      if (!checked) {
-        setHasUserModifiedSlider(false);
-        setLocalSliderValue(bookItNowPercent);
-      }
-    } catch (error) {
-      setLocalBookItNowChecked(!checked);
-      console.error("Failed to toggle Book It Now:", error);
-    } finally {
-      setIsUpdatingSwitch(false);
+  // Notify parent of loading state changes
+  useEffect(() => {
+    onLoadingChange(isLoadingProperty);
+  }, [isLoadingProperty, onLoadingChange]);
+
+  const handleBookItNowSwitch = (checked: boolean) => {
+    setLocalBookItNowChecked(checked); // Optimistic update
+    update({
+      updatedProperty: {
+        id: propertyId,
+        bookItNowEnabled: checked,
+      },
+      currentHostTeamId: currentHostTeamId!,
+    });
+
+    // Reset slider if turning off
+    if (!checked) {
+      setHasUserModifiedSlider(false);
+      setLocalSliderValue(property?.bookItNowHostDiscountPercentOffInput ?? 0);
     }
   };
 
@@ -68,33 +139,19 @@ export default function BookItNowSection({
     setHasUserModifiedSlider(true);
   };
 
-  // After successful save, reset the modified flag
-  const handleBookItNowSliderLocal = async () => {
-    console.log("💾 Save Attempted:", {
-      localSliderValue,
-      previousValue,
-      hasUserModifiedSlider,
-    });
+  const handleBookItNowSliderLocal = () => {
     setPreviousValue(localSliderValue);
-
-    try {
-      const serverUpdate = handleBookItNowSlider(localSliderValue);
-      const newBookItNowPercent = await serverUpdate;
-      setLocalSliderValue(newBookItNowPercent);
-      setBookItNowPercent(newBookItNowPercent);
-      setHasUserModifiedSlider(false); // Reset after successful save
-      setIsError(false);
-    } catch (error) {
-      setLocalSliderValue(previousValue);
-      setBookItNowPercent(previousValue);
-      setIsError(true);
-      console.error("Failed to update Book It Now percentage:", error);
-    }
+    update({
+      updatedProperty: {
+        id: propertyId,
+        bookItNowHostDiscountPercentOffInput: localSliderValue,
+      },
+      currentHostTeamId: currentHostTeamId!,
+    });
   };
 
-  // Change the save button logic to disable during switch update and when no changes
-  const hasChanges = localSliderValue !== bookItNowPercent;
-  const isSaveDisabled = !hasChanges || isUpdatingSwitch; // Disable if no changes OR during switch update
+  const hasChanges =
+    localSliderValue !== property?.bookItNowHostDiscountPercentOffInput;
 
   return (
     <div className="space-y-1 rounded-lg border p-6">
@@ -108,10 +165,8 @@ export default function BookItNowSection({
         </p>
         <Switch
           checked={localBookItNowChecked}
-          disabled={isTogglingBookItNow}
           className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300"
-          onCheckedChange={handleSwitchChange}
-          style={{ cursor: isTogglingBookItNow ? "wait" : "pointer" }}
+          onCheckedChange={handleBookItNowSwitch}
         />
       </div>
 
@@ -137,13 +192,13 @@ export default function BookItNowSection({
             <div className="flex justify-end">
               <Button
                 onClick={handleBookItNowSliderLocal}
-                disabled={isSaveDisabled}
+                disabled={!hasChanges || isRecovering}
                 variant={isError ? "destructive" : "primary"}
               >
                 {isError
                   ? "Try Again"
-                  : isUpdatingSwitch
-                    ? "Please wait..."
+                  : isRecovering
+                    ? "Recovering..."
                     : hasChanges
                       ? "Save"
                       : "Saved"}

@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { AppRouter } from "@/server/api/root";
 import { useState, useMemo, useEffect } from "react";
+
 interface EditableFeeProps {
   property: Property;
   field: ExtraPricingField;
@@ -19,8 +20,11 @@ interface EditableFeeProps {
   learnMoreLink?: string;
   helpText?: string;
   showGuestCounter?: boolean;
-  refetch: () => void;
 }
+
+type MutationContext = {
+  previousProperty: Property | undefined;
+};
 
 export default function EditableFee({
   property,
@@ -30,16 +34,64 @@ export default function EditableFee({
   helpText,
   learnMoreLink,
   showGuestCounter = false,
-  refetch,
 }: EditableFeeProps) {
   const { currentHostTeamId } = useHostTeamStore();
-  const { mutateAsync: updatePricingField, isLoading } =
-    api.properties.updatePropertyPricingField.useMutation();
+  const utils = api.useContext();
+
+  const { mutate: update, isLoading: isUpdating } =
+    api.properties.update.useMutation({
+      onMutate: async (newData) => {
+        await utils.properties.getById.cancel({ id: property.id });
+
+        const previousProperty = utils.properties.getById.getData({
+          id: property.id,
+        });
+
+        if (previousProperty) {
+          utils.properties.getById.setData({ id: property.id }, (old) =>
+            old ? { ...old, ...newData.updatedProperty } : old,
+          );
+        }
+
+        return { previousProperty } as MutationContext;
+      },
+      onError: (err, _newData, context: MutationContext | undefined) => {
+        if (context?.previousProperty) {
+          utils.properties.getById.setData({ id: property.id }, (old) =>
+            old ? { ...context.previousProperty, ...old } : old,
+          );
+        }
+        setEditValue(String(initialValue / 100));
+        if (showGuestCounter) {
+          setEditGuestCount(
+            property.maxGuestsWithoutFee ?? property.maxNumGuests,
+          );
+        }
+
+        if (
+          (err as TRPCClientErrorLike<AppRouter>).data?.code === "FORBIDDEN"
+        ) {
+          toast({
+            title: "You do not have permission to change Co-host roles.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      },
+      onSuccess: () => {
+        toast({
+          title: "Update Successful",
+        });
+        setIsEditing(false);
+      },
+      onSettled: () => {
+        void utils.properties.getById.invalidate({ id: property.id });
+      },
+    });
 
   const [isEditing, setIsEditing] = useState(false);
-  // Get the initial value from the property using the field
   const initialValue = useMemo(() => property[field], [property, field]);
-  // Use a string state and do the converstion when setting the state
   const [editValue, setEditValue] = useState(String(initialValue / 100));
   const [editGuestCount, setEditGuestCount] = useState<number>(
     property.maxGuestsWithoutFee ?? property.maxNumGuests,
@@ -49,7 +101,7 @@ export default function EditableFee({
     setEditValue(String(initialValue / 100));
   }, [initialValue]);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const parsedValue = parseFloat(editValue);
     if (isNaN(parsedValue)) {
       toast({
@@ -59,43 +111,26 @@ export default function EditableFee({
       return;
     }
 
-    await updatePricingField({
+    update({
+      updatedProperty: {
+        id: property.id,
+        [field]: parsedValue * 100,
+        ...(showGuestCounter && {
+          maxGuestsWithoutFee: editGuestCount,
+        }),
+      },
       currentHostTeamId: currentHostTeamId!,
-      propertyId: property.id,
-      field: field,
-      amount: parsedValue * 100, //convert dollar into cents
-      maxGuestsWithoutFee: editGuestCount,
-    })
-      .then(() => {
-        toast({
-          title: "Update Successful",
-        });
-      })
-      .catch((error: TRPCClientErrorLike<AppRouter>) => {
-        if (error.data?.code === "FORBIDDEN") {
-          toast({
-            title: "You do not have permission to change Co-host roles.",
-            description: "Please contact your team owner to request access.",
-          });
-        } else {
-          errorToast();
-        }
-      })
-      .finally(() => {
-        setIsEditing(false);
-        refetch();
-      });
+    });
   };
 
   const handleCancel = () => {
     setEditValue(String(initialValue / 100));
-    setEditGuestCount(1);
+    setEditGuestCount(property.maxGuestsWithoutFee ?? property.maxNumGuests);
     setIsEditing(false);
   };
 
   const handleEditValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // allow only numbers and decimal point
     if (/^\d*\.?\d*$/.test(value)) {
       setEditValue(value);
     }
@@ -159,7 +194,7 @@ export default function EditableFee({
 
         <div className="space-y-2">
           <Button className="w-full" onClick={handleSave}>
-            {isLoading ? "Saving..." : "Save"}
+            {isUpdating ? "Saving..." : "Save"}
           </Button>
           <Button variant="outline" className="w-full" onClick={handleCancel}>
             Cancel
@@ -178,7 +213,6 @@ export default function EditableFee({
         {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
         <div>
           <div className="mb-2 text-sm">{subtitle}</div>
-          {/* Changed this from the property value to the state value */}
           <div className="text-4xl font-semibold">
             ${parseFloat(editValue).toFixed(2)}
           </div>
