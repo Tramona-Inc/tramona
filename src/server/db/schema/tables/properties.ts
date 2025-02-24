@@ -383,6 +383,7 @@ export const properties = pgTable(
       withTimezone: true,
     }),
     tempCasamundoPrice: integer("temp_casamundo_price"),
+    tempEvolvePrice: integer("temp_evolve_price"),
     bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
     autoOfferEnabled: boolean("auto_offer_enabled").notNull().default(false),
     discountTiers: jsonb("discount_tiers").$type<DiscountTier[]>(),

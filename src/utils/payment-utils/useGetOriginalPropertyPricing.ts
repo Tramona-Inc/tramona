@@ -45,6 +45,7 @@ export const useGetOriginalPropertyPricing = ({
 
   // Scraped property logic - using tempCasamundoPrice
   const casamundoPrice = property?.tempCasamundoPrice;
+  const evolvePrice = property?.tempEvolvePrice;
   console.log("casamundoPrice", casamundoPrice);
   const isCasamundoPriceLoading = false;
 
@@ -64,7 +65,9 @@ export const useGetOriginalPropertyPricing = ({
       ? hostPricePerNight * numNights
       : isNumber(casamundoPrice)
         ? casamundoPrice
-        : undefined;
+        : isNumber(evolvePrice)
+          ? evolvePrice
+          : undefined;
 
   console.log(originalBasePrice);
 

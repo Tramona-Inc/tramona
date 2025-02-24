@@ -169,8 +169,9 @@ export async function scrapePage(url: string) {
   const ret = await urlScrape(url)
     .then(($) => $("#data-deferred-state-0").text())
     .then((jsonStr) => JSON.parse(jsonStr))
-    .then((unparsedData) => pageDataSchema.parse(unparsedData))
-    .then((data) => data.niobeMinimalClientData[0][1].data.presentation)
+    .then((unparsedData) => {
+      return pageDataSchema.parse(unparsedData);
+    }).then((data) => data.niobeMinimalClientData[0][1].data.presentation)
     .then((page) => serpPageSchema.parse(page));
 
   // await writeFile("airbnb-page-data.json", JSON.stringify(ret, null, 2));
@@ -191,23 +192,35 @@ export const serpPageSchema = z.object({
             structuredContent: z.object({ title: z.string().nullish() }),
           }),
           contextualPictures: z.array(z.object({ picture: z.string().url() })),
-          pricingQuote: z.object({
-            structuredStayDisplayPrice: z.union([
+          structuredDisplayPrice: z.object({ // <-- ADD structuredDisplayPrice SCHEMA
+            primaryLine: z.union([ // <-- Define union type for primaryLine
               z.object({
-                primaryLine: z.object({
-                  discountedPrice: z.string(),
-                  originalPrice: z.string(),
-                  price: z.undefined(),
-                }),
+                discountedPrice: z.string(),
+                originalPrice: z.string(),
+                price: z.undefined(),
               }),
               z.object({
-                primaryLine: z.object({
-                  discountedPrice: z.undefined(),
-                  originalPrice: z.undefined(),
-                  price: z.string(),
-                }),
+                discountedPrice: z.undefined(),
+                originalPrice: z.undefined(),
+                price: z.string(),
               }),
             ]),
+            secondaryLine: z.object({ // <-- Define secondaryLine schema
+              price: z.string(), // <-- Assuming secondaryLine.price is always a string
+              accessibilityLabel: z.string().optional(), // <-- Add accessibilityLabel, optional
+            }).optional(), // <-- secondaryLine is optional
+            explanationData: z.object({ // <-- Define explanationData schema
+              priceDetails: z.array( // <-- priceDetails is an array
+                z.object({
+                  items: z.array( // <-- items is an array
+                    z.object({
+                      description: z.string().optional(), // <-- description is optional
+                      priceString: z.string().optional(), // <-- priceString is optional
+                    })
+                  ).optional() // <-- items is optional
+                })
+              ).optional() // <-- priceDetails is optional
+            }).optional() // <-- explanationData is optional
           }),
         }),
       ),
@@ -220,7 +233,7 @@ type SearchResult = z.infer<
 >["staysSearch"]["results"]["searchResults"][number];
 
 export function transformSearchResult({
-  searchResult: { listing, pricingQuote, contextualPictures },
+  searchResult: { listing, structuredDisplayPrice, contextualPictures }, // <-- Use structuredDisplayPrice
   numNights,
   numGuests,
 }: {
@@ -229,22 +242,24 @@ export function transformSearchResult({
   numGuests: number;
 }) {
   const discountedPriceStr =
-    pricingQuote.structuredStayDisplayPrice.primaryLine.discountedPrice;
+  structuredDisplayPrice.primaryLine.discountedPrice ?? structuredDisplayPrice.primaryLine.price; // <-- Get price from structuredDisplayPrice
 
-  if (!discountedPriceStr) return undefined;
+if (!discountedPriceStr) return undefined;
 
-  const nightlyPrice = Math.round(
-    parseCurrency(discountedPriceStr) / numNights,
-  );
+const nightlyPrice = Math.round(
+  parseCurrency(discountedPriceStr) / numNights,
+);
 
-  const originalPriceStr =
-    pricingQuote.structuredStayDisplayPrice.primaryLine.originalPrice;
+const originalPriceStr =
+structuredDisplayPrice.primaryLine.originalPrice; // <-- Get original price from structuredDisplayPrice
+
+  const originalNightlyPrice = originalPriceStr
+    ? Math.round(parseCurrency(originalPriceStr) / numNights)
+    : nightlyPrice; // <-- Calculate original nightly price if available
 
   if (!originalPriceStr) return undefined;
 
-  const originalNightlyPrice = Math.round(
-    parseCurrency(originalPriceStr) / numNights,
-  );
+
 
   return {
     nightlyPrice,

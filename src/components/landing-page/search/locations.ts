@@ -6,6 +6,26 @@ interface Location {
 
   export const locations: Location[] = [
     {
+      name: "Phoenix",
+      country: "USA",
+      image: "https://images.unsplash.com/photo-1617407866960-b09fc50af3cb?w=300&h=200&fit=crop",
+    },
+    {
+      name: "Scottsdale",
+      country: "USA",
+      image: "https://images.unsplash.com/photo-1526111787490-c108ba3880b3?w=300&h=200&fit=crop",
+    },
+    {
+      name: "Mesa",
+      country: "USA",
+      image: "https://images.unsplash.com/photo-1613574726650-d1ab2eea296a?w=300&h=200&fit=crop",
+    },
+    {
+      name: "Tempe",
+      country: "USA",
+      image: "https://images.unsplash.com/photo-1574552246628-023a4d4cb0ff?w=300&h=200&fit=crop",
+    },
+    {
       name: "Atlanta",
       country: "USA",
       image: "https://images.unsplash.com/photo-1575917649705-5b59aaa12e6b?w=300&h=200&fit=crop",
@@ -19,11 +39,6 @@ interface Location {
       name: "Dallas",
       country: "USA",
       image: "https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=300&h=200&fit=crop",
-    },
-    {
-      name: "Denver",
-      country: "USA",
-      image: "https://images.unsplash.com/photo-1546156929-a4c0ac411f47?w=300&h=200&fit=crop",
     },
     {
       name: "Puerto Rico",
