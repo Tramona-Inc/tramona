@@ -22,6 +22,8 @@ interface RequestOutreachEmailProps {
   notes?: string;
   maximumPerNightAmount?: number;
   requestDates?: string; // Added requestDates prop
+  hostDashboardLink: string; // Added hostDashboardLink prop
+  calendlyLink: string; // Added calendlyLink prop
 }
 
 export default function RequestOutreachEmail({
@@ -31,6 +33,8 @@ export default function RequestOutreachEmail({
   notes,
   maximumPerNightAmount = 300,
   requestDates = "October 26-27", // Default date placeholder, you should make this dynamic
+  hostDashboardLink = "[Link to Host Dashboard/Requests Page]", // Placeholder for Host Dashboard Link
+  calendlyLink = "[Your Calendly Link Here]", // Placeholder for Calendly Link
 }: RequestOutreachEmailProps) {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
@@ -39,20 +43,23 @@ export default function RequestOutreachEmail({
 
   return (
     <Layout
-      title_preview={`Booking Request for Your Property in ${requestLocation}`}
+      title_preview={`New Booking Request for Your Property in ${requestLocation}`}
     >
       <Container style={container}>
         <Heading
           style={h1}
-        >{`New Booking Request for ${requestLocation}`}</Heading>
+        >{`Tramona: New Booking Request for ${requestLocation}`}</Heading>
         <Text style={text}>
-          We have a booking request for <strong>{requestLocation}</strong>, for{" "}
-          <strong>{requestDates}</strong>.
+          We have a new booking request for your property in{" "}
+          <strong>{requestLocation}</strong>!
         </Text>
         <Section style={detailsContainer}>
           <Text style={detailsHeading}>Request Details:</Text>
           <Text style={detailsText}>
             <strong>Location:</strong> {requestLocation}
+          </Text>
+          <Text style={detailsText}>
+            <strong>Dates:</strong> {requestDates}
           </Text>
           <Text style={detailsText}>
             <strong>Price per night:</strong>{" "}
@@ -67,6 +74,9 @@ export default function RequestOutreachEmail({
           <Text style={{ ...detailsText, ...totalBudgetStyle }}>
             <strong>Potential earnings for your empty night:</strong>{" "}
             {requestAmount ? formatCurrency(requestAmount / 100) : "N/A"}
+            <Text style={{ fontSize: "14px", fontWeight: "normal" }}>
+              (This is the total amount)
+            </Text>
           </Text>
         </Section>
         {notes && (
@@ -75,40 +85,67 @@ export default function RequestOutreachEmail({
             <Text style={notesText}>&apos;{notes}&apos;</Text>
           </Section>
         )}
-        <Text style={{ ...text, fontWeight: "bold", fontSize: "18px" }}>
+        <Text
+          style={{
+            ...text,
+            fontWeight: "bold",
+            fontSize: "18px",
+            textAlign: "left",
+          }}
+        >
           What is Tramona?
         </Text>
-        <Text style={numberedListText}>
-          1. Tramona is the only OTA built to fill your empty nights
+        <Text style={{ ...numberedListText, textAlign: "left" }}>
+          1. Tramona is the only OTA built to supplement other booking channels,
+          and fill your empty nights
         </Text>
-        <Text style={numberedListText}>
-          2. All bookings come with $50,000 of protection.
+        <Text style={{ ...numberedListText, textAlign: "left" }}>
+          2. Tramona charges 5-10% less in fees so every booking puts more in
+          your pocket
         </Text>
-        <Text style={numberedListText}>
-          3. Sign up instantly, with our direct Airbnb connection. This auto
+        <Text style={{ ...numberedListText, textAlign: "left" }}>
+          3. All bookings come with $50,000 of protection.
+        </Text>
+        <Text style={{ ...numberedListText, textAlign: "left" }}>
+          4. Sign up instantly, with our direct Airbnb connection. This auto
           connects your calendars, pricing, properties and anything else on
           Airbnb
         </Text>
-        <Text style={numberedListText}>
-          4. Complete host side customization.
-        </Text>
-
-        <Text style={signUpText}>
-          If you want this booking, or more like it. Sign up now to book your
-          empty night.
-        </Text>
 
         <CustomButton
-          title="Review Request & Accept Booking"
+          title="Log in now to review and accept this booking request"
           link={`${baseUrl}/host/requests`}
         />
+        <Text style={{ ...helpText, marginTop: "24px", marginBottom: "8px" }}>
+          (Copy and paste this link into your browser to review and accept)
+        </Text>
+
+        <Text style={{ ...text, textAlign: "center" }}>
+          Not quite the booking you&apos;re looking for? No worries! We have
+          travelers making requests every day.
+        </Text>
+
+        <Text style={{ ...helpText, fontWeight: "bold", marginTop: "24px" }}>
+          Questions about this request?
+        </Text>
         <Text style={helpText}>
-          If you have any questions, please email us at{" "}
+          Email us at{" "}
           <Link href="mailto:info@tramona.com" style={link}>
             info@tramona.com
           </Link>
         </Text>
+        <Text style={helpText}>
+          Or schedule a quick call with our Host Support team:{" "}
+          <Link href={calendlyLink} style={link}>
+            [Your Calendly Link Here]
+          </Link>
+        </Text>
+        <Text style={{ ...helpText, marginBottom: "32px" }}>
+          (Copy and paste this link to schedule a call)
+        </Text>
+
         <BottomHr />
+        {/* <Text style={{ textAlign: 'center', marginTop: '16px', color: '#6b7280' }}>[Tramona Logo (if you can include a simple text representation)]</Text> */}
         <SocialLinks />
         <Footer />
         <Info />
@@ -122,10 +159,6 @@ const container = {
   margin: "0 auto",
   padding: "20px 0 48px",
   marginBottom: "64px",
-};
-
-const logo = {
-  margin: "0 auto",
 };
 
 const h1 = {
@@ -163,10 +196,10 @@ const detailsText = {
 };
 
 const totalBudgetStyle = {
-  fontSize: "20px", // Make it bigger
-  textAlign: "center" as const, // Center align
-  marginTop: "20px", // Add some spacing
-  fontWeight: "bold", // Make it stand out
+  fontSize: "20px",
+  textAlign: "left" as const,
+  marginTop: "20px",
+  fontWeight: "bold",
 };
 
 const notesContainer = {
@@ -204,15 +237,18 @@ const numberedListText = {
   fontSize: "16px",
   lineHeight: "24px",
   margin: "8px 0",
-  textAlign: "left" as const, // or center if you prefer
-  paddingLeft: "20px", // Indent slightly for list appearance
+  textAlign: "left" as const,
+  paddingLeft: "0px",
 };
 
-const signUpText = {
-  color: "#374151",
-  fontSize: "16px",
-  lineHeight: "24px",
-  margin: "16px 0",
-  textAlign: "center" as const,
-  fontWeight: "bold", // Make it stand out
-};
+// Replace Placeholders in Props:
+
+// hostDashboardLink prop: You must replace the placeholder value "[Link to Host Dashboard/Requests Page]" with the actual URL of your host dashboard requests page in your application where you use the RequestOutreachEmail component.
+
+// calendlyLink prop: You must replace the placeholder value "[Your Calendly Link Here]" with your actual Calendly scheduling link in your application where you use the RequestOutreachEmail component.
+
+// requestDates prop: Ensure you are dynamically passing the actual request dates to the requestDates prop when you use this component. The default value "October 26-27" is just a placeholder.
+
+// Verify SocialLinks and Footer Components:
+
+// The social media links and footer information are handled by the imported SocialLinks and Footer components from ./EmailComponents. Double-check that the SocialLinks component in your EmailComponents.tsx file contains the correct Instagram and Facebook links for Tramona. Similarly, verify the Footer component content is up-to-date.

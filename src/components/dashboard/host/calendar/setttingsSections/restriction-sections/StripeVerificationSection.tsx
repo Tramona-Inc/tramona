@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -8,12 +6,14 @@ import { api } from "@/utils/api";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+
 import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown";
 import type { Property } from "@/server/db/schema";
 
 type MutationContext = {
   previousProperty: Property | undefined;
 };
+
 
 export default function StripeVerificationSection({
   stripeVerRequired,
@@ -23,6 +23,7 @@ export default function StripeVerificationSection({
   property: Property;
 }) {
   const { currentHostTeamId } = useHostTeamStore();
+
   const utils = api.useContext();
   const [isRecovering, setIsRecovering] = useState(false);
 

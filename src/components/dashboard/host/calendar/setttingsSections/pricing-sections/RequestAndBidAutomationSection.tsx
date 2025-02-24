@@ -96,6 +96,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
         </div>
       )}
 
+      {/* CalendarSettingsDropdown */}
       <CalendarSettingsDropdown
         title="Requests and Bids Automation"
         description="Automate your response to make sure you maximize your bookings."
