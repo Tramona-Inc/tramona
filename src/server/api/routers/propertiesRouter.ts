@@ -56,6 +56,7 @@ import {
   getRequestsToBookForProperties,
   isRequestFulfillingThreshold,
   SeparatedData,
+  getMaxRequestToBookDiscount,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
@@ -854,6 +855,7 @@ export const propertiesRouter = createTRPCRouter({
             checkIn: request.checkIn.toISOString(),
             checkOut: request.checkOut.toISOString(),
           });
+          console.log("priceMap", priceMap);
           if (!priceMap) {
             isValid = false;
           } else {
@@ -999,25 +1001,6 @@ export const propertiesRouter = createTRPCRouter({
 
       return { count };
     }),
-
-  updateRequestToBook: coHostProcedure(
-    "modify_overall_pricing_strategy",
-    z.object({
-      propertyId: z.number(),
-      requestToBookMaxDiscountPercentage: z.number(),
-      currentHostTeamId: z.number(),
-    }),
-  ).mutation(async ({ input }) => {
-    await db
-      .update(properties)
-      .set({
-        requestToBookMaxDiscountPercentage:
-          input.requestToBookMaxDiscountPercentage,
-      })
-      .where(eq(properties.id, input.propertyId));
-    console.log("YAY");
-    return;
-  }),
 
   toggleAutoOffer: protectedProcedure
     .input(
@@ -1395,4 +1378,18 @@ export const propertiesRouter = createTRPCRouter({
 
     return property;
   }),
+
+  getMaxRequestToBookDiscount: publicProcedure
+    .input(z.object({
+      propertyId: z.number(),
+      checkIn: z.string(),
+      checkOut: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      return await getMaxRequestToBookDiscount(
+        input.propertyId,
+        input.checkIn,
+        input.checkOut
+      );
+    }),
 });
