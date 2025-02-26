@@ -14,6 +14,7 @@ import { getServiceFee } from "@/utils/payment-utils/payment-utils";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
 import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
 import { PriceBreakdownOutput } from "../checkout/types";
+import { api } from "@/utils/api";
 
 type PriceDetails = {
   numberOfNights: number;
@@ -37,6 +38,24 @@ export default function PriceDetailsBeforeTax({
     nightlyPrice: 0,
   });
 
+  // Fetch dynamic max discount when property and requestToBook are present
+  const { data: dynamicMaxDiscount } =
+    api.properties.getMaxRequestToBookDiscount.useQuery(
+      {
+        propertyId: property?.id ?? 0,
+        checkIn: requestToBook?.checkIn.toISOString() ?? "",
+        checkOut: requestToBook?.checkOut.toISOString() ?? "",
+      },
+      {
+        // Only run query when we have valid data
+        enabled:
+          !!property?.id &&
+          !!requestToBook?.checkIn &&
+          !!requestToBook?.checkOut,
+        keepPreviousData: true,
+      },
+    );
+
   const scrapedPrice = 23456;
 
   let priceWithApplicableDiscount;
@@ -47,14 +66,10 @@ export default function PriceDetailsBeforeTax({
     if (applicableDiscount && applicableDiscount > 0) {
       priceWithApplicableDiscount =
         scrapedPrice * (100 - applicableDiscount) * 0.01;
-    } else if (
-      property.requestToBookMaxDiscountPercentage &&
-      property.requestToBookMaxDiscountPercentage > 0
-    ) {
+    } else if (dynamicMaxDiscount && dynamicMaxDiscount > 0) {
+      // Use dynamic max discount instead of the static property value
       priceWithApplicableDiscount =
-        scrapedPrice *
-        (100 - property.requestToBookMaxDiscountPercentage) *
-        0.01;
+        scrapedPrice * (100 - dynamicMaxDiscount) * 0.01;
     }
   }
 

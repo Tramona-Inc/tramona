@@ -7,6 +7,20 @@ import { errorToast } from "@/utils/toasts";
 import HostRequestToBookCard from "../../dashboard/host/requests/requests-to-book/HostRequestToBookCard";
 import HostRequestToBookDialog from "../../dashboard/host/requests/requests-to-book/HostRequestToBookDialog";
 import { HostDashboardRequestToBook } from "../../dashboard/host/requests/requests-to-book/HostRequestToBookCard";
+import { Property } from "@/server/db/schema";
+
+// Define a type for the simplified property
+type SimplifiedProperty = {
+  id: number;
+  name: string;
+  numBedrooms: number;
+  numBathrooms: number | null;
+  hostName: string | null;
+  hostProfilePic: string | null;
+  city: string;
+  imageUrls: string[];
+  bookOnAirbnb: boolean;
+};
 
 interface HostRequestToBookInfoProps {
   bid: HostDashboardRequestToBook | undefined;

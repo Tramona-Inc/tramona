@@ -30,6 +30,7 @@ import { TRAVELER_MARKUP } from "@/utils/constants";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatTimeLeft } from "../city/HostRequestCard";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
@@ -43,11 +44,15 @@ export default function HostRequestToBookCard({
   requestToBook: HostDashboardRequestToBook;
   children?: React.ReactNode;
 }) {
-  //remove the traveler markup and get num of nights
+  // Calculate the number of nights
+  const numNights = getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+
+  // Calculate the price per night the host will receive (removing traveler markup)
   const pricePerNight =
-    requestToBook.calculatedTravelerPrice /
-    TRAVELER_MARKUP /
-    getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+    requestToBook.calculatedTravelerPrice / TRAVELER_MARKUP / numNights;
+
+  // Calculate the total price the host will receive
+  const totalHostPrice = pricePerNight * numNights;
 
   const fmtdPrice = formatCurrency(pricePerNight);
   const fmtdDateRange = formatDateRange(
@@ -113,10 +118,41 @@ export default function HostRequestToBookCard({
             </div>
             <p>
               Requested:{" "}
-              <span className="font-semibold underline">
-                {fmtdPrice} / night
+              <span className="font-semibold">
+                {formatCurrency(totalHostPrice)}
               </span>
             </p>
+            <Dialog>
+              <DialogTrigger className="text-sm underline">
+                See payment breakdown
+              </DialogTrigger>
+              <DialogContent className="w-full max-w-md sm:max-w-lg">
+                <div className="flex flex-col gap-y-4 rounded-lg p-4 shadow-sm">
+                  <div className="flex justify-between border-b pb-2">
+                    <p className="font-semibold">Payment Breakdown</p>
+                  </div>
+                  <div className="flex flex-col justify-between sm:flex-row">
+                    <span>
+                      {fmtdPrice} x {numNights} nights
+                    </span>
+                    <span className="text-right">
+                      {formatCurrency(totalHostPrice)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col justify-between border-t pt-2 text-lg font-semibold sm:flex-row">
+                    <span>Total You&apos;ll Receive (USD)</span>
+                    <span className="text-right">
+                      {formatCurrency(totalHostPrice)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Note: This is the amount you&apos;ll receive after
+                    Tramona&apos;s fee. Future versions will include cleaning
+                    fee deductions.
+                  </p>
+                </div>
+              </DialogContent>
+            </Dialog>
             <div className="my-2 flex flex-col items-start gap-3 text-black sm:flex-row sm:items-center">
               <Badge
                 variant="secondary"

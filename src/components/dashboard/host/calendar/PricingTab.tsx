@@ -1,20 +1,23 @@
 import RequestAndBidAutomationSection from "./setttingsSections/pricing-sections/RequestAndBidAutomationSection";
 import BookItNowSection from "./setttingsSections/pricing-sections/BookItNowSection";
-import BiddingSection from "./setttingsSections/pricing-sections/BiddingSection";
+import OfferDiscountRestictionsSection from "./setttingsSections/restriction-sections/OfferDiscountRestictionsSections";
 import { Property } from "@/server/db/schema/tables/properties";
+import { api } from "@/utils/api";
+
 export default function PricingTab({
   property,
   isBookItNowChecked,
-  biddingPercent,
-  setBiddingPercent,
   onPriceLoadingChange,
 }: {
   property: Property;
   isBookItNowChecked: boolean;
-  biddingPercent: number;
-  setBiddingPercent: (percent: number) => void;
   onPriceLoadingChange: (isLoading: boolean) => void;
 }) {
+  const { data: discountInfo, isLoading: isLoadingDiscountInfo } =
+    api.properties.getDiscountPreferences.useQuery({
+      propertyId: property.id,
+    });
+
   return (
     <>
       <BookItNowSection
@@ -23,11 +26,11 @@ export default function PricingTab({
         onLoadingChange={onPriceLoadingChange}
       />
 
-      {/* Bidding section */}
-      <BiddingSection
-        biddingPercent={biddingPercent}
-        setBiddingPercent={setBiddingPercent}
+      {/* Offer Discount Restrictions section */}
+      <OfferDiscountRestictionsSection
         property={property}
+        discountInfo={discountInfo}
+        isLoadingDiscountInfo={isLoadingDiscountInfo}
       />
 
       {/* Name your price section */}

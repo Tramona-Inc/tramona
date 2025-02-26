@@ -59,11 +59,7 @@ export default function TravelerRequestToBookCard({
 ) & {
   children?: React.ReactNode;
 }) {
-  const pricePerNight =
-    requestToBook.calculatedTravelerPrice /
-    getNumNights(requestToBook.checkIn, requestToBook.checkOut);
 
-  const fmtdPrice = formatCurrency(pricePerNight); //price before fees but after markup
   const fmtdDateRange = formatDateRange(
     requestToBook.checkIn,
     requestToBook.checkOut,
@@ -86,13 +82,15 @@ export default function TravelerRequestToBookCard({
     paymentBreakdown.superhogFee + paymentBreakdown.stripeTransactionFee;
 
   const totalbeforeFees =
-    paymentBreakdown.totalTripAmount! - serviceFee - paymentBreakdown.taxesPaid;
+    paymentBreakdown.totalTripAmount! - paymentBreakdown.taxesPaid;
 
   const numOfNights = getNumNights(
     requestToBook.checkIn,
     requestToBook.checkOut,
   );
 
+  const pricePerNight = totalbeforeFees / numOfNights;
+  const fmtdPrice = formatCurrency(pricePerNight); //price before fees but after markup
   return (
     <Card className="overflow-hidden p-0">
       <WithdrawRequestToBookDialog
@@ -167,7 +165,7 @@ export default function TravelerRequestToBookCard({
                       <p className="font-semibold">Trip Breakdown</p>
                     </div>
                     <div className="flex flex-col justify-between sm:flex-row">
-                      <span>$128.12 x {numOfNights} nights</span>
+                      <span>{fmtdPrice} x {numOfNights} nights</span>
                       <span className="text-right">
                         {formatCurrency(totalbeforeFees)}
                       </span>
@@ -176,12 +174,12 @@ export default function TravelerRequestToBookCard({
                       <span>Cleaning fee</span>
                       <span className="text-right font-semibold">Included</span>
                     </div>
-                    <div className="flex flex-col justify-between sm:flex-row">
+                    {/* <div className="flex flex-col justify-between sm:flex-row">
                       <span>Tramona service fee</span>
                       <span className="text-right">
                         {formatCurrency(serviceFee)}
                       </span>
-                    </div>
+                    </div> */}
                     <div className="flex flex-col justify-between sm:flex-row">
                       <span>Taxes</span>
                       <span className="text-right">
@@ -213,7 +211,7 @@ export default function TravelerRequestToBookCard({
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
         {type === "guest" && requestToBook.status !== "Accepted" && (
-          <RequestToBookCardPreviews requestToBook={requestToBook} />
+          <RequestToBookCardPreviews requestToBook={requestToBook} pricePerNight={pricePerNight}/>
         )}
       </div>
     </Card>

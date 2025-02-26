@@ -984,8 +984,9 @@ export async function getPropertyOriginalPriceByDays(
         },
       );
 
+      // Create a map using the full date string as the key, not just the day name
       const dayToPriceMap = data.data.dates.reduce((acc: Record<string, number>, date) => {
-        acc[date.day] = date.price.amount / 100;
+        acc[date.date] = date.price.amount / 100;
         return acc;
       }, {});
 
@@ -1043,10 +1044,13 @@ export async function isRequestFulfillingThreshold(
       "Saturday",
     ][dayOfWeek]!;
 
-    const originalNightlyPrice = priceMap[dayName];
+    // Format the current date to YYYY-MM-DD for lookup in the price map
+    const formattedDateString = currentDate.toISOString().split('T')[0]!;
+
+    const originalNightlyPrice = priceMap[formattedDateString];
 
     if (originalNightlyPrice === undefined) {
-      console.warn(`No price found for day: ${dayName}`);
+      console.warn(`No price found for date: ${formattedDateString}`);
       currentDate.setDate(currentDate.getDate() + 1);
       continue;
     }
@@ -1082,9 +1086,6 @@ export async function getPropertyOriginalPrice(
         .toISOString()
         .split("T")[0];
 
-      console.log("formattedCheckIn", formattedCheckIn);
-      console.log("formattedCheckOut", formattedCheckOut);
-
       const { data } = await axios.get<HospitableCalendarResponse>(
         `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
         {
@@ -1110,7 +1111,6 @@ export async function getPropertyOriginalPrice(
 
       const averagePrice = totalPrice / stayNights.length;
 
-      console.log(averagePrice);
       return averagePrice;
     } else if (property.originalListingPlatform === "Hostaway") {
       const { data } = await axios.get<HostawayPriceResponse>(
@@ -1607,6 +1607,92 @@ export async function generateFakeUser(email: string) {
     dateOfBirth: '6/11/1987',
   }).returning({ id: users.id });
   return fakeUser[0]!.id;
+}
+
+export async function getMaxRequestToBookDiscount(
+  propertyId: number,
+  checkIn: string,
+  checkOut: string,
+  options: { tx?: typeof db } = {},
+): Promise<number> {
+  const { tx = db } = options;
+
+  // Get property details to access hospitableListingId
+  const property = await tx.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+    columns: {
+      hospitableListingId: true,
+      originalListingPlatform: true,
+      originalListingId: true,
+    }
+  });
+
+  if (!property?.hospitableListingId) {
+    return 0;
+  }
+
+  // Get property discounts
+  const propertyDiscountInfo = await tx.query.propertyDiscounts.findFirst({
+    where: eq(propertyDiscounts.propertyId, propertyId)
+  });
+
+  if (!propertyDiscountInfo) {
+    return 0;
+  }
+
+  // Get original prices by day
+  const priceMap = await getPropertyOriginalPriceByDays(property, {
+    checkIn,
+    checkOut,
+  });
+
+  if (!priceMap) {
+    return 0;
+  }
+
+  let totalOriginalPrice = 0;
+  let totalDiscountedPrice = 0;
+
+  const currentDate = new Date(checkIn);
+  const endDate = new Date(checkOut);
+
+  while (currentDate < endDate) {
+    const dayOfWeek = currentDate.getDay();
+    const dayName = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ][dayOfWeek]!;
+
+    // Format the current date to YYYY-MM-DD for lookup in the price map
+    const formattedDateString = currentDate.toISOString().split('T')[0]!;
+
+    const originalNightlyPrice = priceMap[formattedDateString];
+
+    if (originalNightlyPrice !== undefined) {
+      // Get the discount for the current day of the week
+      const dailyDiscountKey = `${dayName.toLowerCase()}Discount` as DiscountPropertyKeys;
+      const discountedPrice = originalNightlyPrice * (1 - (propertyDiscountInfo[dailyDiscountKey]) / 100);
+
+      totalOriginalPrice += originalNightlyPrice;
+      totalDiscountedPrice += discountedPrice;
+    }
+
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  if (totalOriginalPrice === 0) {
+    return 0; // Avoid division by zero
+  }
+
+  // Calculate the percentage difference
+  const maxDiscountPercentage = Math.round(((totalOriginalPrice - totalDiscountedPrice) / totalOriginalPrice) * 100);
+
+  return maxDiscountPercentage;
 }
 
 
