@@ -14,12 +14,14 @@ import { GuestDashboardRequestToBook } from "./TravelerRequestToBookCard";
 
 export function RequestToBookCardPreviews({
   requestToBook,
+  pricePerNight
 }: {
   requestToBook: GuestDashboardRequestToBook;
+  pricePerNight: number;
 }) {
+
   const numNights = getNumNights(requestToBook.checkIn, requestToBook.checkOut);
-  const requestedNightlyPrice =
-    requestToBook.calculatedTravelerPrice / numNights;
+  const requestedNightlyPrice = pricePerNight;
 
   const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
   const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
