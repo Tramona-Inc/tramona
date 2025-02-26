@@ -35,20 +35,111 @@ const MastHead = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
   const toggleSectionRef = useRef<HTMLDivElement>(null);
   const [hasPassedButtons, setHasPassedButtons] = useState(false);
 
+  // Add threshold constants with hysteresis to prevent flickering
+  const SCROLL_DOWN_THRESHOLD = 50; // Increased significantly
+  const SCROLL_UP_THRESHOLD = 5; // Keep low threshold for going back
+  const BUTTONS_PASSED_OFFSET = 400;
+
+  // Add state change cooldown to prevent rapid toggles
+  const lastStateChangeTime = useRef(0);
+  const STATE_CHANGE_COOLDOWN_MS = 800; // Prevent any state changes for 800ms after a change
+
+  // Add debounce timeout ref for scroll handling
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastScrollPosition = useRef(0);
+
+  // Add stable state tracking
+  const stableScrollPosition = useRef(0);
+  const stableStateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     const handleScroll = () => {
+      const now = Date.now();
       const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 20);
 
-      if (toggleSectionRef.current) {
-        const buttonPosition = toggleSectionRef.current.offsetTop;
-        setHasPassedButtons(scrollPosition > buttonPosition + 400); // Changed offset to 600
+      // If we're in cooldown period after a state change, don't allow new state changes
+      const isInCooldownPeriod =
+        now - lastStateChangeTime.current < STATE_CHANGE_COOLDOWN_MS;
+
+      // Clear any existing timeout to debounce rapid changes
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Use a short timeout to wait for scroll to stabilize
+      scrollTimeoutRef.current = setTimeout(() => {
+        const isScrollingDown = scrollPosition > lastScrollPosition.current;
+        lastScrollPosition.current = scrollPosition;
+
+        // Only allow state changes if we're not in cooldown period
+        if (!isInCooldownPeriod) {
+          // Double-check scroll position is stable before allowing state change
+          if (Math.abs(scrollPosition - stableScrollPosition.current) > 2) {
+            stableScrollPosition.current = scrollPosition;
+
+            // Ensure scroll is truly stable by waiting 50ms
+            if (stableStateTimeoutRef.current) {
+              clearTimeout(stableStateTimeoutRef.current);
+            }
+
+            stableStateTimeoutRef.current = setTimeout(() => {
+              // Enhanced hysteresis with direction awareness
+              let shouldUpdateState = false;
+
+              if (isScrolled && scrollPosition < SCROLL_UP_THRESHOLD) {
+                setIsScrolled(false);
+                shouldUpdateState = true;
+              } else if (
+                !isScrolled &&
+                scrollPosition > SCROLL_DOWN_THRESHOLD &&
+                isScrollingDown
+              ) {
+                setIsScrolled(true);
+                shouldUpdateState = true;
+              }
+
+              // Record the time of state change for cooldown calculation
+              if (shouldUpdateState) {
+                lastStateChangeTime.current = Date.now();
+              }
+            }, 50);
+          }
+        }
+
+        // Always check buttons regardless of cooldown
+        if (toggleSectionRef.current) {
+          const buttonPosition = toggleSectionRef.current.offsetTop;
+          setHasPassedButtons(
+            scrollPosition > buttonPosition + BUTTONS_PASSED_OFFSET,
+          );
+        }
+      }, 20);
+    };
+
+    // Using throttled scroll event for better performance
+    let ticking = false;
+    const throttledHandleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("scroll", throttledHandleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", throttledHandleScroll);
+      // Clear all timeouts on cleanup
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      if (stableStateTimeoutRef.current) {
+        clearTimeout(stableStateTimeoutRef.current);
+      }
+    };
+  }, [isScrolled]);
 
   const handleTabChange = (tab: string) => {
     void router.push(
