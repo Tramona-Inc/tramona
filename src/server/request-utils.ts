@@ -32,7 +32,7 @@ import {
 } from "@/utils/payment-utils/paymentBreakdown";
 import { differenceInDays } from "date-fns";
 import { generateFakeUser } from "./server-utils";
-import { emailPMFromCityRequest, emailWarmLeadsFromCityRequest } from "@/utils/outreach-utils";
+import { createInstantlyCampaign } from "@/utils/outreach-utils";
 
 export async function handleRequestSubmission(
   input: RequestInput,
@@ -101,42 +101,32 @@ export async function handleRequestSubmission(
       .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
       .then((res) => res[0]!);
 
-    //TO DO - figure out if i need to get coordinates here or elsewhere
-
-    // if (input.lat === undefined || input.lng === null || input.radius === null) {
-    //   const coordinates = await getCoordinates(input.location);
-    //   if (coordinates.location) {
-
-    //   }
-    // }
-
-    void emailPMFromCityRequest({
-      requestLocation: input.location,
-      checkIn: input.checkIn,
-      checkOut: input.checkOut,
-      numGuests: input.numGuests ?? 1,
-      requestedLocationLatLng: {
-        lat: lat,
-        lng: lng,
+    // Create an Instantly.ai campaign for this booking request
+    // This replaces the previous emailPMFromCityRequest and emailWarmLeadsFromCityRequest functions
+    void createInstantlyCampaign({
+      campaignName: `Booking Request: ${input.location} ${formatDateRange(input.checkIn, input.checkOut)}`,
+      locationFilter: {
+        lat: lat ?? 0,
+        lng: lng ?? 0,
+        radiusKm: radius ?? 0, // Convert radius to km if needed
       },
-      radius: input.radius,
-      requestId: request.id.toString(),
-      pricePerNight: pricePerNight,
-      totalPrice: totalPrice,
-    });
-
-    void emailWarmLeadsFromCityRequest({
-      requestLocation: input.location,
-      requestedLocationLatLng: {
-        lat: lat,
-        lng: lng,
+      customVariables: {
+        // Include all relevant booking information as custom variables
+        requestLocation: input.location,
+        requestId: request.id.toString(),
+        checkInDate: input.checkIn.toISOString(),
+        checkOutDate: input.checkOut.toISOString(),
+        numGuests: input.numGuests ?? 1,
+        pricePerNight: pricePerNight,
+        totalPrice: totalPrice,
+        numNights: getNumNights(input.checkIn, input.checkOut),
       },
-      checkIn: input.checkIn,
-      checkOut: input.checkOut,
-      numGuests: input.numGuests ?? 1,
-      requestId: request.id.toString(),
-      pricePerNight: pricePerNight,
-      totalPrice: totalPrice,
+      // Configure campaign to run immediately and complete within 1 day
+      scheduleOptions: {
+        startTime: "09:00",
+        endTime: "20:00", // Extended end time to ensure all emails are sent
+        startDate: new Date(), // Start today
+      }
     });
 
     waitUntil(
