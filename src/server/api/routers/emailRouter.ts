@@ -12,7 +12,7 @@ import { referralCodes, users } from "@/server/db/schema";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
-
+import WelcomeHostEmail from "packages/transactional/emails/WelcomeHostsEmail";
 export const emailRouter = createTRPCRouter({
   sendSupportEmail: publicProcedure
     .input(
@@ -62,11 +62,30 @@ export const emailRouter = createTRPCRouter({
     }),
 
   sendWelcomeEmail: protectedProcedure.mutation(async ({ ctx }) => {
+    const referralCode = await db.query.referralCodes.findFirst({
+      where: eq(referralCodes.ownerId, ctx.user.id),
+    });
     await sendEmail({
       to: ctx.user.email,
       subject: "Welcome to Tramona",
       content: WelcomeEmail({
         name: ctx.user.firstName ?? ctx.user.name ?? "Guest",
+        referralCode: referralCode!.referralCode,
+      }),
+    });
+  }),
+
+  sendWelcomeHostEmail: protectedProcedure.mutation(async ({ ctx }) => {
+    const referralCode = await db.query.referralCodes.findFirst({
+      where: eq(referralCodes.ownerId, ctx.user.id),
+    });
+
+    await sendEmail({
+      to: ctx.user.email,
+      subject: "Welcome to Tramona",
+      content: WelcomeHostEmail({
+        name: ctx.user.firstName ?? ctx.user.name ?? "Guest",
+        referralCode: referralCode!.referralCode,
       }),
     });
   }),

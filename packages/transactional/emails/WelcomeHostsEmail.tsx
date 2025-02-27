@@ -2,22 +2,22 @@ import { Section, Text, Link } from "@react-email/components";
 import { Layout, CustomButton } from "./EmailComponents";
 
 interface WelcomeHostEmailProps {
-  userName: string;
-  completeListingLink: string;
-  referralLink: string; // Added referralLink prop
-  helpCenterLink: string; // Added helpCenterLink prop
+  name: string;
+  referralCode: string; // Added referralLink prop
 }
 
 export default function WelcomeHostEmail({
-  userName = "Host",
-  completeListingLink = "https://www.tramona.com/complete-listing",
-  referralLink = "[Your Unique Referral Link Here]", // Default referral link placeholder
-  helpCenterLink = "[Link to Help Center]", // Default help center link placeholder
+  name = "Host",
+  referralCode = "[Your Unique Referral Link Here]", // Default referral link placeholder
 }: WelcomeHostEmailProps) {
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "http://localhost:3000";
   return (
     <Layout title_preview="Welcome to Tramona! Let's Turn Empty Nights into Bookings">
       <Text className="text-brand px-6 text-left text-base">
-        Hi {userName},
+        Hi {name},
       </Text>
       <Text className="text-brand px-6 text-left text-base">
         Welcome to Tramona! We&apos;re thrilled to have you join our community
@@ -104,12 +104,12 @@ export default function WelcomeHostEmail({
         Ready to get started? Click below to complete your listing and unlock
         the full potential of your property.
       </Text>
-      <Section
+      {/* <Section
         className="flex justify-center px-6 pb-6"
         style={{ width: "100%" }}
       >
         <CustomButton link={completeListingLink} title="Complete My Listing" />
-      </Section>
+      </Section> */}
 
       <Text className="text-brand mt-8 px-6 text-left text-base font-bold">
         Help Tramona grow & Get Rewarded!
@@ -123,19 +123,17 @@ export default function WelcomeHostEmail({
         community.
       </Text>
       <Text className="text-brand mt-2 px-6 text-left text-base">
-        Here&apos;s your unique referral link to share:
+        Here&apos;s your unique referral code to share:
       </Text>
       <Text className="text-brand px-6 text-left text-base">
-        <Link href={referralLink} className="text-black no-underline">
-          {referralLink}
-        </Link>
+        {referralCode}
       </Text>
 
       <Text className="text-brand mt-4 px-6 text-left text-base">
         Need help getting started or have questions? Our Host Support team is
         here for you. Visit our Help Center{" "}
-        <Link href={helpCenterLink} className="text-black no-underline">
-          [Link to Help Center]
+        <Link href={`${baseUrl}/help-center`} className="text-black no-underline">
+          {`${baseUrl}/help-center`}
         </Link>{" "}
         or email us at{" "}
         <Link

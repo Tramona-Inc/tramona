@@ -1,128 +1,232 @@
-/* eslint-disable @next/next/no-img-element */
 import { Text, Button } from "@react-email/components";
 import { Layout } from "./EmailComponents";
 
-export default function WelcomeEmail({ name }: { name: string }) {
+interface WelcomeEmailProps {
+  name: string;
+  referralCode: string;
+}
+
+export default function WelcomeEmail({ name, referralCode }: WelcomeEmailProps) {
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://www.tramona.com"
+    : "http://localhost:3000";
   return (
     <Layout title_preview="Welcome to Tramona">
-      <div className="border-b border-gray-300 bg-white p-6 text-black">
-        <div className="mb-4" style={{ display: "inline-block" }}>
+      <div
+        style={{
+          padding: "24px",
+          backgroundColor: "#fff",
+          color: "#000",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}
+        >
           <img
             src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
             alt="Tramona Logo"
-            style={{ width: "24px", verticalAlign: "middle" }}
+            style={{ width: "24px" }}
           />
           <span
-            className="ml-2 text-lg font-bold text-black"
-            style={{ verticalAlign: "middle" }}
+            style={{
+              marginLeft: "8px",
+              fontSize: "20px",
+              fontWeight: "bold",
+            }}
           >
             Tramona
           </span>
         </div>
-        <div
-          className="mx-auto my-4 w-full"
-          style={{ borderBottom: "2px solid #e0e0e0" }}
-        ></div>
-        <Text className="mb-4 text-center text-3xl font-bold">
-          Welcome to Tramona {name}!
+        <hr
+          style={{
+            border: "none",
+            borderBottom: "2px solid #e0e0e0",
+            marginBottom: "24px",
+          }}
+        />
+
+        {/* Welcome Message */}
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: "24px",
+            fontWeight: "bold",
+            marginBottom: "16px",
+          }}
+        >
+          Welcome to Tramona, {name}!
         </Text>
-        <Text className="mb-4 text-left">
-          Hello, my name is Blake Singleton, Co-founder and CEO of Tramona.
-          Thank you for helping us make traveling easier than ever before.
+        <Text style={{ marginBottom: "16px", fontSize: "16px", lineHeight: "1.5" }}>
+          Hi {name},<br /><br />
+          Welcome to Tramona! We&apos;re excited to have you join a community of travelers
+          discovering one-of-a-kind deals and finding new ways to travel more.
         </Text>
-        <Text className="mb-4 text-left">
-          Tramona was started with one goal in mind—allowing people to travel
-          more for less, while cutting out fees in the process. (Did you know
-          some of the bigger platforms charge around 20% per booking?) Every
-          platform claims to give discounts, but after the fees, is it really a
-          discount?
+        <Text style={{ marginBottom: "16px", fontSize: "16px", lineHeight: "1.5" }}>
+          Tramona is a unique platform designed to connect travelers directly with hosts,
+          creating win-win opportunities for everyone. Whether you&apos;re looking for your
+          next getaway or thinking about becoming a host yourself, Tramona offers
+          something special.
         </Text>
-        <Text className="mb-2 text-left text-xl font-bold">
-          What is Tramona?
+
+        {/* Features List */}
+        <Text
+          style={{
+            marginBottom: "8px",
+            fontSize: "16px",
+            fontWeight: "bold",
+          }}
+        >
+          As a traveler on Tramona, you can:
         </Text>
-        <Text className="mb-4 text-left">
-          Tramona is a one-of-a-kind booking platform. Every time you book it
-          will be a truly unique booking deal you can’t find anywhere else, on
-          the same properties, you see everywhere else.
+        <ul
+          style={{
+            marginLeft: "20px",
+            marginBottom: "16px",
+            fontSize: "16px",
+            lineHeight: "1.5",
+          }}
+        >
+          <li>
+            <strong>Name Your Own Price &amp; Find Incredible Stays</strong>: Submit requests for your desired trips and get matched with hosts offering amazing deals on their properties. These opportunities are only available on Tramona.
+          </li>
+          <li>
+            <strong>Travel Fee-Free with Friends</strong>: Introduce Tramona with your travel buddies and unlock fee-free bookings! For every friend you refer who signs up, you&apos;ll get your next booking completely fee-free. Travel more, pay less, together.
+          </li>
+          <li>
+            <strong>Save Big on Your Travels</strong>: By connecting you directly with hosts that have empty nights, Tramona helps you save significantly on your getaways, while also increasing revenue to the hosts.
+          </li>
+        </ul>
+
+        {/* Host Section */}
+        <Text
+          style={{
+            marginBottom: "16px",
+            fontSize: "16px",
+            fontWeight: "bold",
+          }}
+        >
+          Thinking of becoming a host and filling your own empty nights?
         </Text>
-        <Text className="mb-4 text-left">
-          We have already allowed travelers to save <b>$250,000+</b> booking the
-          same properties they find on other sites, on our site. Let&apos;s keep
-          growing this number.
+        <Text style={{ marginBottom: "16px", fontSize: "16px", lineHeight: "1.5" }}>
+          Tramona is also the only platform specifically built to help hosts like you fill
+          those hard-to-book vacancies and maximize your earnings.{" "}
+          <a
+            href={`${baseUrl}/why-list`}
+            style={{ color: "#000", textDecoration: "none", fontWeight: "bold" }}
+          >
+            Learn more about becoming a host
+          </a>.
         </Text>
-        <Text className="mb-2 text-left text-xl font-bold">
-          How does it work?
+
+        {/* Call-to-Action */}
+        <Text
+          style={{
+            marginBottom: "16px",
+            fontSize: "16px",
+            fontWeight: "bold",
+          }}
+        >
+          Ready to start traveling more?
         </Text>
-        <Text className="mb-8 text-left">
-          One of the biggest problems hosts face is vacancies due to market
-          saturation, and as more people become hosts every day, the problem is
-          worsening. This is where Tramona comes in. We allow travelers to
-          submit an offer or a request. The host gets to match it, maximizing
-          the dates booked hosts receive, while allowing travelers the chance to
-          travel at lower prices. This makes Tramona the best place to book the
-          best properties around the world.
+        <div style={{ textAlign: "center", marginBottom: "16px" }}>
+          <Button
+            href={`${baseUrl}?tab=search`}
+            style={{
+              padding: "12px 24px",
+              backgroundColor: "#000",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              textDecoration: "none",
+            }}
+          >
+            Make a request
+          </Button>
+        </div>
+
+        {/* Referral Link Section */}
+        <Text
+          style={{
+            marginBottom: "8px",
+            fontSize: "16px",
+            fontWeight: "bold",
+          }}
+        >
+          Share the Travel Savings & Earn Fee-Free Bookings!
         </Text>
-        <Text className="m-0 text-left">Thanks,</Text>
-        <Text className="m-0 text-left">Blake Singleton, CEO</Text>
-        <Text className="mb-6 mt-0 text-left">
-          Questions? Send them to us directly at{" "}
-          <a href="mailto:info@tramona.com" className="text-black no-underline">
-            info@tramona.com
+        <Text style={{ marginBottom: "16px", fontSize: "16px", lineHeight: "1.5" }}>
+          Want to eliminate booking fees entirely? It&apos;s easy! Share your unique referral
+          code with your friends and family who love to travel. For every person who signs
+          up for Tramona through your link, you&apos;ll unlock a booking with zero traveler fees!
+        </Text>
+        <Text style={{ marginBottom: "16px", fontSize: "16px", lineHeight: "1.5" }}>
+          Here&apos;s your unique referral code to share:{" "}
+          <span style={{ fontWeight: "bold" }}>{referralCode}</span>
+        </Text>
+
+        {/* Help Section */}
+        <Text style={{ marginBottom: "16px", fontSize: "16px", lineHeight: "1.5" }}>
+          Have questions about exploring travel options or learning more about hosting? Visit
+          our{" "}
+          <a
+            href={`${baseUrl}/help-center`}
+            style={{ color: "#000", textDecoration: "none", fontWeight: "bold" }}
+          >
+            Help Center
+          </a>{" "}
+          or simply reply to this email, we&apos;re here to help you get started!
+        </Text>
+
+        {/* Footer */}
+        <Text style={{ fontSize: "16px", lineHeight: "1.5", marginBottom: "24px" }}>
+          Happy Travels (and Hosting!),<br />
+          The Tramona Team<br />
+          <a
+            href={`${baseUrl}`}
+            style={{ color: "#000", textDecoration: "none", fontWeight: "bold" }}
+          >
+            www.Tramona.com
           </a>
         </Text>
-        <div
-          className="mx-auto my-4 w-full"
-          style={{ borderBottom: "2px solid #e0e0e0" }}
-        ></div>
-        <div style={{ paddingTop: "16px", overflow: "hidden" }}>
-          <div style={{ float: "left" }}>
+        <hr
+          style={{
+            border: "none",
+            borderBottom: "2px solid #e0e0e0",
+            marginBottom: "16px",
+          }}
+        />
+        <div style={{ textAlign: "center" }}>
+          <img
+            src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
+            alt="Tramona Logo"
+            style={{ width: "32px", marginRight: "16px" }}
+          />
+          <a
+            href="https://www.instagram.com/shoptramona/"
+            style={{ marginRight: "16px", display: "inline-block" }}
+          >
             <img
-              src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
-              alt="Tramona Logo"
+              src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
+              alt="Instagram"
               style={{ width: "32px" }}
             />
-          </div>
-          <div style={{ float: "right" }}>
-            <a
-              href="https://www.instagram.com/shoptramona/"
-              style={{
-                display: "inline-block",
-                marginLeft: "16px",
-                color: "black",
-              }}
-            >
-              <img
-                src="https://www.tramona.com/assets/images/email-images/instagram_wbg.png"
-                alt="Tramona Logo"
-                style={{ width: "32px" }}
-              />
-            </a>
-            <a
-              href="https://www.facebook.com/ShopTramona"
-              style={{
-                display: "inline-block",
-                marginLeft: "16px",
-                color: "black",
-              }}
-            >
-              <img
-                src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
-                alt="Tramona Logo"
-                style={{ width: "32px" }}
-              />
-            </a>
-          </div>
-          <div style={{ clear: "both" }}></div>
+          </a>
+          <a href="https://www.facebook.com/ShopTramona">
+            <img
+              src="https://www.tramona.com/assets/images/email-images/facebook_wbg.png"
+              alt="Facebook"
+              style={{ width: "32px" }}
+            />
+          </a>
         </div>
       </div>
     </Layout>
   );
 }
-
-// [Link to Host Information Page] - Replace with the actual link to your host information page.
-
-// [Link to traveler search/request page] - Replace with the actual link to your traveler search or request page.
-
-// [Link to Help Center] - Replace with the actual link to your Help Center.
-
-// referralLink prop: You will need to pass the dynamically generated referral link for each user to the WelcomeEmail component as the referralLink prop.

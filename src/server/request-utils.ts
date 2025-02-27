@@ -84,24 +84,10 @@ export async function handleRequestSubmission(
       latLngPoint = createLatLngGISPoint({ lat, lng });
     }
 
+    const pricePerNight = input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
+    const totalPrice = input.maxTotalPrice;
+
     // Send emails to property managers and warm leads
-    void emailPMFromCityRequest({
-      requestLocation: input.location,
-      requestedLocationLatLng: {
-        lat: lat,
-        lng: lng,
-      },
-      radius: input.radius,
-    });
-
-    void emailWarmLeadsFromCityRequest({
-      requestLocation: input.location,
-      requestedLocationLatLng: {
-        lat: lat,
-        lng: lng,
-      },
-    });
-
     if (!radius || !latLngPoint) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -123,6 +109,35 @@ export async function handleRequestSubmission(
 
     //   }
     // }
+
+    void emailPMFromCityRequest({
+      requestLocation: input.location,
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+      numGuests: input.numGuests ?? 1,
+      requestedLocationLatLng: {
+        lat: lat,
+        lng: lng,
+      },
+      radius: input.radius,
+      requestId: request.id.toString(),
+      pricePerNight: pricePerNight,
+      totalPrice: totalPrice,
+    });
+
+    void emailWarmLeadsFromCityRequest({
+      requestLocation: input.location,
+      requestedLocationLatLng: {
+        lat: lat,
+        lng: lng,
+      },
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+      numGuests: input.numGuests ?? 1,
+      requestId: request.id.toString(),
+      pricePerNight: pricePerNight,
+      totalPrice: totalPrice,
+    });
 
     waitUntil(
       scrapeDirectListings({
