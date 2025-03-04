@@ -307,15 +307,13 @@ const MastHead = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
               {/* Left side - Text Content */}
               <div className="w-full text-left">
                 <h2 className="mt-8 text-5xl font-bold text-white">
-                  Turn empty nights into opportunities
+                  Book Airbnb without the fees
                 </h2>
                 <h3 className="mt-6 text-xl font-semibold text-white">
-                  Supplement your existing booking platforms and fill your empty
-                  nights
+                  Book directly with the host and spend 50% less on fees
                 </h3>
                 <h4 className="text-h4-size mt-3 font-semibold text-white">
-                  Sign up and seamlessly sync your host account with Airbnb in
-                  seconds
+                  Hosts- sign up directly or connect your direct listing site
                 </h4>
                 <h3 className="mt-4 text-lg font-semibold text-white">
                   <button

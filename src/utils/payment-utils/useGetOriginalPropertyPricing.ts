@@ -64,9 +64,9 @@ export const useGetOriginalPropertyPricing = ({
     isHospitable && hostPricePerNight
       ? hostPricePerNight * numNights
       : isNumber(casamundoPrice)
-        ? casamundoPrice
+        ? casamundoPrice * numNights
         : isNumber(evolvePrice)
-          ? evolvePrice
+          ? evolvePrice * numNights
           : undefined;
 
   console.log(originalBasePrice);
