@@ -2,7 +2,7 @@ import { formatDateRange } from "@/utils/utils";
 
 import { RequestInput } from "./api/routers/requestsRouter";
 
-import { db } from "./db";
+import { db, secondaryDb } from "./db";
 import { waitUntil } from "@vercel/functions";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 import { eq } from "drizzle-orm";
@@ -33,6 +33,16 @@ import {
 import { differenceInDays } from "date-fns";
 import { generateFakeUser } from "./server-utils";
 import { createInstantlyCampaign } from "@/utils/outreach-utils";
+import { sql } from "drizzle-orm";
+
+interface ScraperResponse {
+  message: string;
+  success: boolean;
+}
+
+interface PropertyManagerEmail {
+  email: string | string[];
+}
 
 export async function handleRequestSubmission(
   input: RequestInput,
@@ -101,33 +111,6 @@ export async function handleRequestSubmission(
       .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
       .then((res) => res[0]!);
 
-    // Create an Instantly.ai campaign for this booking request
-    // This replaces the previous emailPMFromCityRequest and emailWarmLeadsFromCityRequest functions
-    void createInstantlyCampaign({
-      campaignName: `Booking Request: ${input.location} ${formatDateRange(input.checkIn, input.checkOut)}`,
-      locationFilter: {
-        lat: lat ?? 0,
-        lng: lng ?? 0,
-        radiusKm: radius ?? 0, // Convert radius to km if needed
-      },
-      customVariables: {
-        // Include all relevant booking information as custom variables
-        requestLocation: input.location,
-        requestId: request.id.toString(),
-        checkInDate: input.checkIn.toISOString(),
-        checkOutDate: input.checkOut.toISOString(),
-        numGuests: input.numGuests ?? 1,
-        pricePerNight: pricePerNight,
-        totalPrice: totalPrice,
-        numNights: getNumNights(input.checkIn, input.checkOut),
-      },
-      // Configure campaign to run immediately and complete within 1 day
-      scheduleOptions: {
-        startTime: "09:00",
-        endTime: "20:00", // Extended end time to ensure all emails are sent
-        startDate: new Date(), // Start today
-      }
-    });
 
     waitUntil(
       scrapeDirectListings({
@@ -278,6 +261,214 @@ export async function handleRequestSubmission(
       ].join("\n"),
     });
   }
+
+  // Run the Instantly.ai campaign creation asynchronously
+  // This way, even if it fails, the request submission will have already been completed
+  const campaignPromise = (async () => {
+    try {
+      const lat = input.lat;
+      const lng = input.lng;
+      const radius = input.radius;
+      const requestId = transactionResults.requestId;
+      const requestedPoint = createLatLngGISPoint({ lat: lat ?? 0, lng: lng ?? 0 });
+
+      // Check for existing property managers
+      const propertyManagers = await secondaryDb.execute(sql`
+        SELECT COUNT(*) as count
+        FROM property_manager_contacts
+        WHERE lat_lng_point IS NOT NULL
+        AND ST_DWithin(
+          ST_Transform(lat_lng_point, 3857),
+          ST_Transform(${requestedPoint}, 3857),
+          ${(radius ?? 10) * 1000}
+        )
+      `);
+
+      const pmCount = Number(propertyManagers[0]?.count ?? 0);
+      console.log(`Found ${pmCount} property managers in the requested location.`);
+
+      const baseUrl = "https://www.tramona.com";
+      const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
+      const emailBody = `
+        Tramona: New Booking Request for ${input.location}
+
+        We have a new booking request for your property in ${input.location}!
+
+        Request Details:
+        Location: ${input.location}
+        Dates: ${fmtdDateRange}
+        Number of guests: ${plural(input.numGuests ?? 1, "guest")}
+        Potential earnings for your empty night: ${input.maxTotalPrice ? formatCurrency(input.maxTotalPrice) : "N/A"}
+
+        What is Tramona?
+
+        1. Tramona is the only OTA built to supplement other booking channels, and fill your empty nights
+        2. Tramona charges 5-10% less in fees so every booking puts more in your pocket
+        3. All bookings come with $50,000 of protection.
+        4. Sign up instantly, with our direct Airbnb connection. This auto connects your calendars, pricing, properties and anything else on Airbnb
+
+        Log in now to review and accept this booking request at: ${baseUrl}/request-preview/${requestId}
+
+        Not quite the booking you're looking for? No worries! We have travelers making requests every day.
+
+        Questions about this request?
+        Email us at info@tramona.com
+        `.trim();
+
+      // Create campaign immediately (no emails yet)
+      const campaignId = await createInstantlyCampaign({
+        campaignName: `Booking Request: ${input.location} ${formatDateRange(input.checkIn, input.checkOut)}`,
+        locationFilter: {
+          lat: lat ?? 0,
+          lng: lng ?? 0,
+          radiusKm: radius ?? 0,
+        },
+        customVariables: {
+          requestLocation: input.location,
+          requestId: requestId.toString(),
+          checkInDate: input.checkIn.toISOString(),
+          checkOutDate: input.checkOut.toISOString(),
+          numGuests: input.numGuests ?? 1,
+          pricePerNight: pricePerNight,
+          totalPrice: input.maxTotalPrice,
+          numNights: getNumNights(input.checkIn, input.checkOut),
+        },
+        scheduleOptions: {
+          startTime: "09:00",
+          endTime: "20:00",
+          startDate: new Date(),
+        },
+        sequences: {
+          steps: [
+            {
+              subject: `Booking Request for ${input.location}`,
+              body: emailBody,
+              delay: 0
+            }
+          ]
+        }
+      });
+
+      if (!campaignId) {
+        throw new Error("Failed to create Instantly.ai campaign - no campaign ID returned");
+      }
+      console.log(`Created Instantly.ai campaign ${campaignId} for request ${requestId}`);
+
+      // Trigger scraper and incrementally add emails
+      if (pmCount === 0) {
+        console.log(`No property managers found for ${input.location}, triggering scraper...`);
+        try {
+          const scraperResponse = await fetch("https://googlescrape.onrender.com/scrape", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location: input.location }),
+          });
+
+          if (!scraperResponse.ok) {
+            const errorData = await scraperResponse.json() as { message?: string };
+            throw new Error(errorData.message ?? "Scraper request failed");
+          }
+
+          const result = await scraperResponse.json() as ScraperResponse;
+          console.log(`Scheduled property manager scraping for ${input.location}: ${result.message}`);
+
+          // Poll Supabase for 3 minutes, adding emails incrementally
+          const startTime = Date.now();
+          const addedEmails = new Set<string>(); // Track added emails to avoid duplicates
+
+          while (Date.now() - startTime < 180000) { // 3-minute window
+            const queryResult = await secondaryDb.execute(sql`
+              SELECT email
+              FROM property_manager_contacts
+              WHERE city = ${input.location}
+            `);
+
+            const propertyManagers = queryResult.map(row => ({
+              email: row.email as string | string[]
+            })) as PropertyManagerEmail[];
+
+            if (propertyManagers.length > 0) {
+              const newEmails = propertyManagers
+                .map(row => Array.isArray(row.email) ? row.email : [row.email])
+                .flat()
+                .filter((email): email is string =>
+                  typeof email === 'string' &&
+                  email.includes('@') &&
+                  !addedEmails.has(email)
+                );
+
+              if (newEmails.length > 0) {
+                try {
+                  const addEmailsResponse = await fetch("https://api.instantly.ai/api/v2/leads/bulk", {
+                    method: "POST",
+                    headers: {
+                      "Authorization": `Bearer ${process.env.INSTANTLY_API_KEY}`,
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      campaign_id: campaignId,
+                      leads: newEmails.map(email => ({ email }))
+                    })
+                  });
+
+                  if (!addEmailsResponse.ok) {
+                    const errorData = await addEmailsResponse.json() as { message?: string };
+                    throw new Error(errorData.message ?? "Failed to add emails");
+                  }
+
+                  newEmails.forEach(email => addedEmails.add(email));
+                  console.log(`Added ${newEmails.length} new emails to campaign ${campaignId}. Total: ${addedEmails.size}`);
+                } catch (addError) {
+                  console.error(`Error adding emails to campaign ${campaignId}:`, addError);
+                  void sendSlackMessage({
+                    isProductionOnly: true,
+                    channel: "tramona-errors",
+                    text: [
+                      `*Error adding emails to campaign ${campaignId} for request ${transactionResults.requestId}*`,
+                      `Location: ${input.location}`,
+                      `Error: ${String(addError)}`,
+                    ].join("\n"),
+                  });
+                }
+              }
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5s
+          }
+
+          if (addedEmails.size === 0) {
+            console.warn(`No emails added to campaign ${campaignId} after polling`);
+          }
+        } catch (scraperError) {
+          console.error(`Error scheduling scraper:`, scraperError);
+          void sendSlackMessage({
+            isProductionOnly: true,
+            channel: "tramona-errors",
+            text: [
+              `*Error scheduling scraper for request ${transactionResults.requestId}*`,
+              `Location: ${input.location}`,
+              `Error: ${String(scraperError)}`,
+            ].join("\n"),
+          });
+        }
+      }
+
+    } catch (error) {
+      console.error("Error in campaign creation process:", error);
+      void sendSlackMessage({
+        isProductionOnly: true,
+        channel: "tramona-errors",
+        text: [
+          `*Error in campaign process for request ${transactionResults.requestId}*`,
+          `Location: ${input.location}`,
+          `Error: ${String(error)}`,
+        ].join("\n"),
+      });
+    }
+  })();
+
+  // Use void to ignore the promise result
+  void waitUntil(campaignPromise);
 
   return transactionResults;
 }
