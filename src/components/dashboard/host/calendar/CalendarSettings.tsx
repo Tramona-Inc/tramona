@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HostPropertiesRestrictionsTab from "./HostPropertiesRestrictionsTab";
 import { Property } from "@/server/db/schema/tables/properties";
 import HostFeeTab from "./HostFeeTab";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import PricingTab from "./PricingTab";
 interface CalendarSettingsProps {
@@ -16,17 +16,6 @@ export default function CalendarSettings({
   isBookItNowChecked,
   onPriceLoadingChange,
 }: CalendarSettingsProps) {
-  // const { currentHostTeamId } = useHostTeamStore();
-
-  // <---------------------------------- MUTATIONS ---------------------------------->
-
-  // const { mutateAsync: updateRequestToBook } =
-  //   api.properties.updateRequestToBook.useMutation();
-
-  const [bookItNowPercent, setBookItNowPercent] = useState<number>(
-    property.bookItNowHostDiscountPercentOffInput,
-  );
-
   // This is used to check if the book it now percent has changed
   const initialBookItNowPercent = useRef<number>(
     property.bookItNowHostDiscountPercentOffInput,
@@ -35,48 +24,10 @@ export default function CalendarSettings({
   const router = useRouter();
   const activeTab = (router.query.tab as string) || "pricing";
 
-  // const [biddingOpen, setBiddingOpen] = useState(false);
-  // const [biddingSaved, setBiddingSaved] = useState(false);
-  const [biddingPercent, setBiddingPercent] = useState<number>(
-    property.requestToBookMaxDiscountPercentage,
-  );
-
-  console.log("biddingPercent", biddingPercent);
-
-
   useEffect(() => {
-    setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
-    setBiddingPercent(property.requestToBookMaxDiscountPercentage);
     initialBookItNowPercent.current =
       property.bookItNowHostDiscountPercentOffInput;
   }, [property]); //update when the selected property changes
-
-  // const handleBiddingSave = async () => {
-  //   setBiddingSaved(true);
-  //   setTimeout(() => setBiddingSaved(false), 2000);
-  //   await updateRequestToBook({
-  //     propertyId: property.id,
-  //     requestToBookMaxDiscountPercentage: biddingPercent,
-  //     currentHostTeamId: currentHostTeamId!,
-  //   })
-  //     .then(() => {
-  //       toast({
-  //         title: "Successfully updated book it now percentage!",
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  //       if (error.data?.code === "FORBIDDEN") {
-  //         toast({
-  //           title:
-  //             "You do not have permission to edit overall pricing strategy.",
-  //           description: "Please contact your team owner to request access.",
-  //         });
-  //       } else {
-  //         errorToast();
-  //       }
-  //     });
-  // };
 
   return (
     <Card className="h-full flex-1">
@@ -142,8 +93,6 @@ export default function CalendarSettings({
               property={property}
               isBookItNowChecked={isBookItNowChecked}
               onPriceLoadingChange={onPriceLoadingChange}
-              biddingPercent={biddingPercent}
-              setBiddingPercent={setBiddingPercent}
             />
           </TabsContent>
           <TabsContent value="fees" className="space-y-6 sm:space-y-8">

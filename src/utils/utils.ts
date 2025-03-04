@@ -701,39 +701,6 @@ export function getOfferDiscountPercentage(
   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
 }
 
-// export function getrequestToBookMaxDiscountPercentage(offer: {
-//   createdAt: Date;
-//   calculatedTravelerPrice: number;
-//   checkIn: Date;
-//   checkOut: Date;
-//   scrapeUrl?: number | null;
-//   datePriceFromAirbnb: number | null;
-//   randomDirectListingDiscount?: number | null;
-// }) {
-//   const numNights = getNumNights(offer.checkIn, offer.checkOut);
-//   const offerNightlyPrice = offer.calculatedTravelerPrice / numNights;
-//   //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
-//   if (offer.randomDirectListingDiscount) {
-//     return offer.randomDirectListingDiscount;
-//   }
-
-//   //2.) check if the property is going to be booked directly on airbnb TODO
-
-//   //3.) check the if the offer is by a real host and is listed on airbnb
-//   if (offer.datePriceFromAirbnb) {
-//     console.log(
-//       offer.datePriceFromAirbnb,
-//       offer.calculatedTravelerPrice,
-//     );
-//     return getDiscountPercentage(
-//       offer.datePriceFromAirbnb,
-//       offer.calculatedTravelerPrice,
-//     );
-//   }
-//   //4.)for other cases random number
-//   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
-// }
-
 export function createRandomMarkupEightToFourteenPercent() {
   return Math.floor(Math.random() * 7 + 8);
 }

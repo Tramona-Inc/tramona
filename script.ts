@@ -498,3 +498,29 @@
 
 // await handler();
 // process.exit(1);
+import { db } from "@/server/db";
+import { referralCodes } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
+import { sendEmail } from "@/server/server-utils";
+import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
+import WelcomeHostEmail from "packages/transactional/emails/WelcomeHostsEmail";
+const referralCode = await db.query.referralCodes.findFirst({
+  where: eq(referralCodes.ownerId, '1ae35d03-d953-4d22-8e23-6c4086f6623c'),
+});
+
+console.log(referralCode);
+
+async function sendWelcomeEmail(email: string, name: string, referralCode: string) {
+  await sendEmail({
+    to: email,
+  subject: "Welcome to Tramona",
+  content: WelcomeHostEmail({
+    name: "Blake",
+    referralCode: referralCode,
+  }),
+});
+}
+
+await sendWelcomeEmail("sashagordin22@gmail.com", "Sasha", referralCode!.referralCode);
+
+process.exit(1);

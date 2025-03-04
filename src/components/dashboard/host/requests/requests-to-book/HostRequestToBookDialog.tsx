@@ -20,6 +20,7 @@ import Spinner from "@/components/_common/Spinner";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { baseAmountToHostPayout } from "@/utils/payment-utils/paymentBreakdown";
+import { TRAVELER_MARKUP } from "@/utils/constants";
 
 export default function HostRequestToBookDialog({
   open,
@@ -43,8 +44,25 @@ export default function HostRequestToBookDialog({
           variant: "default",
           title: "Booking Accepted",
         });
+        setOpen(false);
       },
     });
+
+  const numNights = getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+
+  // Calculate the price per night the host will receive (removing traveler markup)
+  const pricePerNight =
+    requestToBook.calculatedTravelerPrice / TRAVELER_MARKUP / numNights;
+
+  // Calculate the total price the host will receive
+  const totalHostPrice = pricePerNight * numNights;
+
+  const fmtdPrice = formatCurrency(pricePerNight);
+  const fmtdDateRange = formatDateRange(
+    requestToBook.checkIn,
+    requestToBook.checkOut,
+  );
+  const fmtdNumGuests = plural(requestToBook.numGuests, "guest");
 
   const hasCancellationPolicy = Boolean(property?.cancellationPolicy);
 
@@ -60,51 +78,47 @@ export default function HostRequestToBookDialog({
               Please review the request details for your property.
             </DialogDescription>
             <div className="space-y-2">
-              <div className="rounded-md border p-4">
-                <div className="mb-4 flex justify-between">
-                  <div className="flex flex-col items-start">
+              <div className="rounded-md border bg-gray-50 p-6">
+                <h4 className="text-md mb-4 font-semibold text-gray-700">
+                  Booking Details
+                </h4>
+                <div className="grid grid-cols-3 gap-6">
+                  {/* Price column */}
+                  <div className="flex flex-col space-y-2">
+                    <div className="text-xs font-medium text-gray-500">
+                      Price
+                    </div>
                     <div className="text-dark text-lg font-bold">
-                      {formatCurrency(
-                        requestToBook.calculatedBasePrice /
-                          getNumNights(
-                            requestToBook.checkIn,
-                            requestToBook.checkOut,
-                          ),
-                      )}
-                      /night
+                      {formatCurrency(totalHostPrice)}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {formatCurrency(requestToBook.calculatedBasePrice)} total
+                      {fmtdPrice} / night
                     </div>
                   </div>
-                  <div className="flex flex-col items-center">
+
+                  {/* Dates column */}
+                  <div className="flex flex-col space-y-2">
+                    <div className="text-xs font-medium text-gray-500">
+                      Dates
+                    </div>
                     <div className="text-dark text-lg font-bold">
-                      {formatDateRange(
-                        requestToBook.checkIn,
-                        requestToBook.checkOut,
-                      )}
+                      {fmtdDateRange}
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {plural(
-                        getNumNights(
-                          requestToBook.checkIn,
-                          requestToBook.checkOut,
-                        ),
-                        "night",
-                      )}
-                    </div>
+                    {/* <div className="text-sm text-gray-700">
+                      {plural(numNights, "night")}
+                    </div> */}
                   </div>
-                  <div className="flex flex-col items-end">
+
+                  {/* Guests column */}
+                  <div className="flex flex-col space-y-2">
+                    <div className="text-xs font-medium text-gray-500">
+                      Guests
+                    </div>
                     <div className="text-dark text-lg font-bold">
-                      {plural(requestToBook.numGuests, "guest")}
+                      {fmtdNumGuests}
                     </div>
                   </div>
                 </div>
-                {/* {requestToBook.note && (
-              <div className="rounded-md bg-gray-100 p-2">
-                <div className="text-sm text-gray-700">{requestToBook.note}</div>
-              </div>
-            )} */}
               </div>
             </div>
             <div className="mt-4">
@@ -161,11 +175,7 @@ export default function HostRequestToBookDialog({
                     <div className="text-sm text-gray-600">
                       By accepting this price, your final payout will be{" "}
                       <span className="font-semibold text-black">
-                        {formatCurrency(
-                          baseAmountToHostPayout(
-                            requestToBook.calculatedBasePrice,
-                          ),
-                        )}{" "}
+                        {formatCurrency(totalHostPrice)}
                       </span>
                     </div>
                   )}

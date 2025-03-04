@@ -29,7 +29,6 @@ export default function HostRequestsToBookPage({
   // Use useSearchParams to get the propertyId from the query string
   const propertyId = parseInt(router.query.id as string);
 
-  console.log(propertyId);
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -45,13 +44,12 @@ export default function HostRequestsToBookPage({
       },
     });
 
-  const { data: propertyRequests } =
+  const { data: propertyRequests, isLoading: isLoadingRequests } =
     api.requestsToBook.getHostRequestsToBookFromId.useQuery(
       { propertyId, currentHostTeamId: currentHostTeamId! },
       { enabled: !!currentHostTeamId && !isIndex },
     );
 
-  console.log(propertyRequests);
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
@@ -63,12 +61,8 @@ export default function HostRequestsToBookPage({
     }
   }, [currentHostTeamId]);
 
-  console.log(propertyRequests);
-
   // pagination logic begins (used for PaginationButtons.tsx)
-
   const [currentPage, setCurrentPage] = useState(1);
-
   const ITEMS_PER_PAGE = 8;
 
   const paginatedBids = useMemo(() => {
@@ -140,6 +134,7 @@ export default function HostRequestsToBookPage({
                       <Button disabled>{data.status}</Button>
                     )}
                   </HostRequestToBookCard>
+
                   {currentHostTeamId && (
                     <HostRequestToBookDialog
                       open={dialogOpen}
@@ -189,13 +184,15 @@ export default function HostRequestsToBookPage({
           </Card>
         )}
       </div>
-      <PaginationButtons
-        items={propertyRequests?.activeRequestsToBook ?? []}
-        setCurrentPage={setCurrentPage}
-        currentPage={currentPage}
-        itemsPerPage={ITEMS_PER_PAGE}
-        router={router}
-      />
+      {paginatedBids && (
+        <PaginationButtons
+          items={propertyRequests?.activeRequestsToBook ?? []}
+          setCurrentPage={setCurrentPage}
+          currentPage={currentPage}
+          itemsPerPage={ITEMS_PER_PAGE}
+          router={router}
+        />
+      )}
     </div>
   );
 }

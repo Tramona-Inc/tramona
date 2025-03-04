@@ -5,7 +5,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import { formatCurrency, plural } from "@/utils/utils";
+import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import {
   BottomHr,
   CustomButton,
@@ -14,16 +14,17 @@ import {
   Layout,
   SocialLinks,
 } from "./EmailComponents";
+import { formatDate } from "date-fns";
 
 interface RequestOutreachEmailProps {
   requestLocation: string;
-  requestAmount?: number;
-  numOfGuest?: number;
+  requestAmount: number;
+  numOfGuest: number;
   notes?: string;
   maximumPerNightAmount?: number;
-  requestDates?: string; // Added requestDates prop
-  // hostDashboardLink: string; // Added hostDashboardLink prop
-  // calendlyLink: string; // Added calendlyLink prop
+  checkIn: Date;
+  checkOut: Date;
+  requestId: string;
 }
 
 export default function RequestOutreachEmail({
@@ -32,14 +33,16 @@ export default function RequestOutreachEmail({
   numOfGuest = 3,
   notes,
   maximumPerNightAmount = 300,
-  requestDates = "October 26-27", // Default date placeholder, you should make this dynamic
-  // hostDashboardLink = "[Link to Host Dashboard/Requests Page]", // Placeholder for Host Dashboard Link
-  // calendlyLink = "[Your Calendly Link Here]", // Placeholder for Calendly Link
+  checkIn = new Date("October 26, 2024"),
+  checkOut = new Date("October 27, 2024"),
+  requestId = "168",
 }: RequestOutreachEmailProps) {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
     : "http://localhost:3000";
+
+  const fmtdDateRange = formatDateRange(checkIn, checkOut);
 
   return (
     <Layout
@@ -49,17 +52,17 @@ export default function RequestOutreachEmail({
         <Heading
           style={h1}
         >{`Tramona: New Booking Request for ${requestLocation}`}</Heading>
-        <Text style={text}>
+        {/* <Text style={text}>
           We have a new booking request for your property in{" "}
           <strong>{requestLocation}</strong>!
-        </Text>
+        </Text> */}
         <Section style={detailsContainer}>
           <Text style={detailsHeading}>Request Details:</Text>
           <Text style={detailsText}>
             <strong>Location:</strong> {requestLocation}
           </Text>
           <Text style={detailsText}>
-            <strong>Dates:</strong> {requestDates}
+            <strong>Dates:</strong> {fmtdDateRange}
           </Text>
           <Text style={detailsText}>
             <strong>Price per night:</strong>{" "}
@@ -68,15 +71,12 @@ export default function RequestOutreachEmail({
               : "N/A"}
           </Text>
           <Text style={detailsText}>
-            <strong>Number of guests:</strong> {numOfGuest}{" "}
+            <strong>Number of guests:</strong>{" "}
             {plural(numOfGuest, "guest")}
           </Text>
           <Text style={{ ...detailsText, ...totalBudgetStyle }}>
             <strong>Potential earnings for your empty night:</strong>{" "}
-            {requestAmount ? formatCurrency(requestAmount / 100) : "N/A"}
-            <Text style={{ fontSize: "14px", fontWeight: "normal" }}>
-              (This is the total amount)
-            </Text>
+            {requestAmount ? formatCurrency(requestAmount) : "N/A"}
           </Text>
         </Section>
         {notes && (
@@ -114,11 +114,8 @@ export default function RequestOutreachEmail({
 
         <CustomButton
           title="Log in now to review and accept this booking request"
-          link={`${baseUrl}/host/requests`}
+          link={`${baseUrl}/request-preview/${requestId}`}
         />
-        <Text style={{ ...helpText, marginTop: "24px", marginBottom: "8px" }}>
-          (Copy and paste this link into your browser to review and accept)
-        </Text>
 
         <Text style={{ ...text, textAlign: "center" }}>
           Not quite the booking you&apos;re looking for? No worries! We have
@@ -136,13 +133,13 @@ export default function RequestOutreachEmail({
         </Text>
         <Text style={helpText}>
           Or schedule a quick call with our Host Support team:{" "}
-          {/* <Link href={calendlyLink} style={link}>
-            [Your Calendly Link Here]
-          </Link> */}
+          <Link href="https://calendly.com/tramona/call-with-tramona-team" style={link}>
+            https://calendly.com/tramona/call-with-tramona-team
+          </Link>
         </Text>
-        <Text style={{ ...helpText, marginBottom: "32px" }}>
+        {/* <Text style={{ ...helpText, marginBottom: "32px" }}>
           (Copy and paste this link to schedule a call)
-        </Text>
+        </Text> */}
 
         <BottomHr />
         {/* <Text style={{ textAlign: 'center', marginTop: '16px', color: '#6b7280' }}>[Tramona Logo (if you can include a simple text representation)]</Text> */}
@@ -247,7 +244,6 @@ const numberedListText = {
 
 // calendlyLink prop: You must replace the placeholder value "[Your Calendly Link Here]" with your actual Calendly scheduling link in your application where you use the RequestOutreachEmail component.
 
-// requestDates prop: Ensure you are dynamically passing the actual request dates to the requestDates prop when you use this component. The default value "October 26-27" is just a placeholder.
 
 // Verify SocialLinks and Footer Components:
 

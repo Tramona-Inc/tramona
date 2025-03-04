@@ -2,13 +2,19 @@ import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
 import { secondaryDb } from "@/server/db";
 import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
-import { propertyManagerContactsTest as propertyManagerContacts } from "@/server/db/secondary-schema";
+import { propertyManagerContactsTest as propertyManagerContacts, propertyManagerContactsTest } from "@/server/db/secondary-schema";
 import { cities } from "@/server/db/secondary-schema/cities";
 import { warmLeads } from "@/server/db/secondary-schema/warmLeads";
 //import { propertyManagerContacts } from "@/server/db/secondary-schema";
 
 interface EmailPMFromCityRequestInput {
   requestLocation: string;
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+  requestId: string;
+  pricePerNight: number;
+  totalPrice: number;
   requestedLocationLatLng?: {
     lat: number | undefined;
     lng: number | undefined;
@@ -49,7 +55,7 @@ export async function emailPMFromCityRequest(
           )
         `.as("distance_meters"),
       })
-      .from(propertyManagerContacts)
+      .from(propertyManagerContactsTest)
       .where(
         sql`
           lat_lng_point IS NOT NULL
@@ -100,9 +106,15 @@ export async function emailPMFromCityRequest(
         try {
           await sendEmail({
             to: email,
-            subject: `${manager.propertyManagerName} Potential Travelers looking for a stay in ${input.requestLocation}`,
+            subject: `Tramona: Booking request for ${input.requestLocation}`,
             content: RequestOutreachEmail({
               requestLocation: input.requestLocation, // Email content still uses requestLocation for now
+              checkIn: input.checkIn,
+              checkOut: input.checkOut,
+              numOfGuest: input.numGuests,
+              requestId: input.requestId,
+              maximumPerNightAmount: input.pricePerNight,
+              requestAmount: input.totalPrice,
             }),
           });
           console.log(`Email sent to: ${email}`);
@@ -131,6 +143,12 @@ interface EmailWarmLeadsFromCityRequestInput {
     lat: number | undefined;
     lng: number | undefined;
   };
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+  requestId: string;
+  pricePerNight: number;
+  totalPrice: number;
 }
 
 export async function emailWarmLeadsFromCityRequest(
@@ -192,9 +210,15 @@ export async function emailWarmLeadsFromCityRequest(
       try {
         await sendEmail({
           to: lead.email,
-          subject: `Potential Travelers looking for a stay in ${input.requestLocation}`,
+          subject: `Tramona: Booking request for ${input.requestLocation}`,
           content: RequestOutreachEmail({
             requestLocation: input.requestLocation,
+            checkIn: input.checkIn,
+            checkOut: input.checkOut,
+            numOfGuest: input.numGuests,
+            requestId: input.requestId,
+            maximumPerNightAmount: input.pricePerNight,
+            requestAmount: input.totalPrice,
           }),
         });
         console.log(`Email sent to warm lead: ${lead.email}`);

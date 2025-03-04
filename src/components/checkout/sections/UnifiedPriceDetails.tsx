@@ -24,8 +24,6 @@ export function UnifiedPriceDetails({
     unifiedCheckoutData.dates.checkIn,
     unifiedCheckoutData.dates.checkOut,
   );
-  const nightlyPrice =
-    unifiedCheckoutData.pricing.calculatedTravelerPrice / numberOfNights;
 
   const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
     dates: {
@@ -33,13 +31,16 @@ export function UnifiedPriceDetails({
       checkOut: unifiedCheckoutData.dates.checkOut,
     },
     calculatedTravelerPrice:
-      unifiedCheckoutData.pricing.calculatedTravelerPrice,
+    unifiedCheckoutData.pricing.calculatedTravelerPrice,
     property: unifiedCheckoutData.property,
   });
 
+  const nightlyPrice =
+    (paymentBreakdown.totalTripAmount! - paymentBreakdown.taxesPaid) / numberOfNights;
+
   const items = [
     {
-      title: `${formatCurrency(paymentBreakdown.totalTripAmount! - paymentBreakdown.taxesPaid)} x ${plural(numberOfNights, "night")}`,
+      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
       price: `${formatCurrency(paymentBreakdown.totalTripAmount! - paymentBreakdown.taxesPaid)}`,
     },
     {

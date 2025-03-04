@@ -24,7 +24,7 @@ export default function CaseStudyEmail({ name }: { name: string }) {
           className="mx-auto my-4 w-full"
           style={{ borderBottom: "2px solid #e0e0e0" }}
         ></div>
-        <Text className="mb-4 text-center text-3xl font-bold">Case Study</Text>
+        <Text className="mb-4 text-center text-3xl font-bold">Follow Up</Text>
         <Text className="mb-4 text-left">
           Dear {name},
           <br />
