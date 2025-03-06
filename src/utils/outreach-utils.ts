@@ -244,19 +244,6 @@ export async function emailWarmLeadsFromCityRequest(
 }
 
 // Add interfaces for campaign tracking
-interface CampaignTrackingRecord {
-  campaignId: string;
-  location: {
-    lat: number;
-    lng: number;
-    radiusKm: number;
-  };
-  createdAt: Date;
-  completedAt?: Date;
-  leadCount: number;
-}
-
-// Add this new interface for the Instantly.ai campaign creation
 interface CreateInstantlyCampaignInput {
   campaignName: string;
   locationFilter?: {
@@ -276,7 +263,6 @@ interface CreateInstantlyCampaignInput {
     startDate?: Date; // Optional start date for the campaign
     endDate?: Date; // Optional end date for the campaign
   };
-  forceCampaign?: boolean; // Force creation of a new campaign even if cooldown period hasn't elapsed
   onlyWarmLeads?: boolean; // Only add warm leads to the campaign
   sequences?: {
     steps: {
@@ -289,6 +275,7 @@ interface CreateInstantlyCampaignInput {
     }[];
   }[];
 }
+
 // List of valid Instantly.ai timezone values
 const VALID_INSTANTLY_TIMEZONES = [
   "Etc/GMT+12",
@@ -307,77 +294,6 @@ const VALID_INSTANTLY_TIMEZONES = [
   // There are more, but these are common ones
 ];
 
-// In-memory cache of recent campaigns (in a production app, this should be stored in a database)
-const recentCampaigns: CampaignTrackingRecord[] = [];
-
-/**
- * Finds a recent campaign for a given location within the specified cooldown period
- * @param location The location to check
- * @param cooldownDays Number of days to consider for cooldown
- * @returns The most recent campaign for the location, or null if none exists
- */
-function findRecentCampaignForLocation(
-  location: { lat: number; lng: number; radiusKm?: number },
-  cooldownDays = 2
-): CampaignTrackingRecord | null {
-  if (!location.lat || !location.lng) return null;
-
-  const now = new Date();
-  const cooldownThreshold = new Date(now.getTime() - cooldownDays * 24 * 60 * 60 * 1000);
-
-  // Filter campaigns to find those that are for a nearby location and within the cooldown period
-  const radiusKm = location.radiusKm ?? 10;
-  const recentLocationCampaigns = recentCampaigns.filter(campaign => {
-    // Check if created within cooldown period
-    if (campaign.createdAt < cooldownThreshold) return false;
-
-    // Calculate approximate distance between locations (simple haversine formula)
-    const earthRadiusKm = 6371;
-    const dLat = (campaign.location.lat - location.lat) * Math.PI / 180;
-    const dLng = (campaign.location.lng - location.lng) * Math.PI / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(location.lat * Math.PI / 180) * Math.cos(campaign.location.lat * Math.PI / 180) *
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = earthRadiusKm * c;
-
-    // Check if the campaign is within the radius (either campaign's or current request's)
-    return distance <= Math.max(radiusKm, campaign.location.radiusKm);
-  });
-
-  // Sort by creation date (newest first) and return the first one if any
-  return recentLocationCampaigns.sort((a, b) =>
-    b.createdAt.getTime() - a.createdAt.getTime()
-  )[0] ?? null;
-}
-
-/**
- * Tracks campaign creation
- * @param campaignId The ID of the created campaign
- * @param location The location for the campaign
- * @param leadCount Number of leads in the campaign
- */
-function trackCampaignCreation(
-  campaignId: string,
-  location: { lat: number; lng: number; radiusKm: number },
-  leadCount: number
-): void {
-  recentCampaigns.push({
-    campaignId,
-    location,
-    createdAt: new Date(),
-    leadCount
-  });
-
-  // Prune old campaigns (older than 7 days) to prevent memory bloat
-  const pruneThreshold = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
-  const pruneIndex = recentCampaigns.findIndex(c => c.createdAt < pruneThreshold);
-  if (pruneIndex !== -1) {
-    recentCampaigns.splice(0, pruneIndex + 1);
-  }
-}
-
 /**
  * Creates a campaign in Instantly.ai using leads from the warm leads table
  * @param input Parameters for creating the Instantly.ai campaign
@@ -394,124 +310,108 @@ export async function createInstantlyCampaign(
     return null;
   }
 
-  let campaignId: string | null = null;
-
-  // Check for recent campaigns for this location if location filter is provided
-  if (input.locationFilter && !input.forceCampaign) {
-    const recentCampaign = findRecentCampaignForLocation(input.locationFilter);
-    if (recentCampaign) {
-      console.log(`Found recent campaign ${recentCampaign.campaignId} for this location created on ${recentCampaign.createdAt.toISOString()}.`);
-      campaignId = recentCampaign.campaignId;
-    }
-  }
-
   try {
-    // If we don't have a campaign ID yet, create a new campaign
-    if (!campaignId) {
-      // Set default schedule options if not provided - modified to ensure emails are sent within 1 day
-      const scheduleOptions = input.scheduleOptions ?? {};
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+    // Set default schedule options if not provided - modified to ensure emails are sent within 1 day
+    const scheduleOptions = input.scheduleOptions ?? {};
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const startTime = scheduleOptions.startTime ?? "09:00";
-      const endTime = scheduleOptions.endTime ?? "17:00";
-      const timezone = scheduleOptions.timezone ?? "America/Chicago"; // Using a known valid timezone
-      // Default to every day (to ensure emails are sent within 1 day window)
-      const workDays = scheduleOptions.workDays ?? [true, true, true, true, true, true, true];
+    const startTime = scheduleOptions.startTime ?? "09:00";
+    const endTime = scheduleOptions.endTime ?? "17:00";
+    const timezone = scheduleOptions.timezone ?? "America/Chicago"; // Using a known valid timezone
+    // Default to every day (to ensure emails are sent within 1 day window)
+    const workDays = scheduleOptions.workDays ?? [true, true, true, true, true, true, true];
 
-      // Validate the timezone
-      if (!VALID_INSTANTLY_TIMEZONES.includes(timezone)) {
-        console.warn(`Warning: The timezone "${timezone}" may not be supported by Instantly.ai.
-          If campaign creation fails, try one of these timezones: ${VALID_INSTANTLY_TIMEZONES.join(", ")}`);
-      }
+    // Validate the timezone
+    if (!VALID_INSTANTLY_TIMEZONES.includes(timezone)) {
+      console.warn(`Warning: The timezone "${timezone}" may not be supported by Instantly.ai.
+        If campaign creation fails, try one of these timezones: ${VALID_INSTANTLY_TIMEZONES.join(", ")}`);
+    }
 
-      // Convert workDays array to the format expected by Instantly.ai
-      const daysObject: Record<string, boolean> = {};
-      workDays.forEach((isActive, index) => {
-        daysObject[index.toString()] = isActive;
-      });
+    // Convert workDays array to the format expected by Instantly.ai
+    const daysObject: Record<string, boolean> = {};
+    workDays.forEach((isActive, index) => {
+      daysObject[index.toString()] = isActive;
+    });
 
-      // Create a new campaign in Instantly.ai with the required campaign_schedule
-      type CampaignPayload = {
-        name: string;
-        campaign_schedule: {
-          schedules: Array<{
-            name: string;
-            timing: {
-              from: string;
-              to: string;
-            };
-            days: Record<string, boolean>;
-            timezone: string;
-          }>;
-          start_date?: string;
-          end_date?: string;
-        };
-        sequences: Array<{
-          steps: Array<{
-            type: string;
-            delay: number;
-            variants: Array<{
-              subject: string;
-              body: string;
-            }>;
+    // Create a new campaign in Instantly.ai with the required campaign_schedule
+    type CampaignPayload = {
+      name: string;
+      campaign_schedule: {
+        schedules: Array<{
+          name: string;
+          timing: {
+            from: string;
+            to: string;
+          };
+          days: Record<string, boolean>;
+          timezone: string;
+        }>;
+        start_date?: string;
+        end_date?: string;
+      };
+      sequences: Array<{
+        steps: Array<{
+          type: string;
+          delay: number;
+          variants: Array<{
+            subject: string;
+            body: string;
           }>;
         }>;
-        is_evergreen: boolean;
-        email_gap: number;
-        random_wait_max: number;
-      };
+      }>;
+      is_evergreen: boolean;
+      email_gap: number;
+      random_wait_max: number;
+    };
 
-      const campaignPayload: CampaignPayload = {
-        name: input.campaignName,
-        campaign_schedule: {
-          schedules: [
-            {
-              name: "Default Schedule",
-              timing: {
-                from: startTime,
-                to: endTime
-              },
-              days: daysObject,
-              timezone: timezone
-            }
-          ],
-          start_date: now.toISOString(),
-          end_date: tomorrow.toISOString()
-        },
-        sequences: [
+    const campaignPayload: CampaignPayload = {
+      name: input.campaignName,
+      campaign_schedule: {
+        schedules: [
           {
-            steps: input.sequences?.[0]?.steps ?? []
+            name: "Default Schedule",
+            timing: {
+              from: startTime,
+              to: endTime
+            },
+            days: daysObject,
+            timezone: timezone
           }
         ],
-        is_evergreen: false,
-        email_gap: 5,
-        random_wait_max: 2
-      };
+        start_date: now.toISOString(),
+        end_date: tomorrow.toISOString()
+      },
+      sequences: [
+        {
+          steps: input.sequences?.[0]?.steps ?? []
+        }
+      ],
+      is_evergreen: false,
+      email_gap: 5,
+      random_wait_max: 2
+    };
 
-      const createCampaignResponse = await fetch("https://api.instantly.ai/api/v2/campaigns", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(campaignPayload),
-      });
+    const createCampaignResponse = await fetch("https://api.instantly.ai/api/v2/campaigns", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(campaignPayload),
+    });
 
-      if (!createCampaignResponse.ok) {
-        console.error("Failed to create campaign in Instantly.ai:", await createCampaignResponse.text());
-        return null;
-      }
-
-      // Parse campaign response
-      const campaignData = await createCampaignResponse.json() as { id: string };
-      campaignId = campaignData.id;
-
-      console.log(`Created new Instantly.ai campaign with ID: ${campaignId}`);
-    } else {
-      console.log(`Using existing campaign with ID: ${campaignId}`);
+    if (!createCampaignResponse.ok) {
+      console.error("Failed to create campaign in Instantly.ai:", await createCampaignResponse.text());
+      return null;
     }
+
+    // Parse campaign response
+    const campaignData = await createCampaignResponse.json() as { id: string };
+    const campaignId = campaignData.id;
+
+    console.log(`Created new Instantly.ai campaign with ID: ${campaignId}`);
 
     // Now query for leads to add to the campaign
     const queryBuilder = secondaryDb
@@ -565,7 +465,7 @@ export async function createInstantlyCampaign(
 
     let propertyManagersToAdd: LeadInfo[] = [];
 
-    if (input.locationFilter) {
+    if (input.locationFilter && !input.onlyWarmLeads) {
       const { lat, lng, radiusKm = 10 } = input.locationFilter;
       const requestedPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
       const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
@@ -610,120 +510,98 @@ export async function createInstantlyCampaign(
     // Combine both lead sources - if there's an overlap, the warm leads take precedence
     const allLeads = [...warmLeadsToAdd, ...propertyManagersToAdd];
 
-    // Add the leads to the campaign if any were found
-    if (allLeads.length > 0) {
-      for (const lead of allLeads) {
-        if (!lead.email) {
-          console.log(`Skipping lead ${lead.id} due to missing email.`);
-          continue;
-        }
-
-        try {
-          // Handle both string and array email formats
-          const emails = Array.isArray(lead.email) ? lead.email : [lead.email];
-
-          for (const email of emails) {
-            if (!email) continue;
-
-            const addLeadResponse = await fetch("https://api.instantly.ai/api/v2/leads", {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                campaign: campaignId,
-                email: email,
-                // Add any other lead parameters as needed
-                custom_variables: input.customVariables ?? {},
-              }),
-            });
-
-            if (!addLeadResponse.ok) {
-              console.error(`Failed to add lead ${lead.id} with email ${email} to campaign:`, await addLeadResponse.text());
-              continue;
-            }
-
-            console.log(`Added lead with email ${email} to campaign`);
-          }
-
-          // Update the lastEmailSentAt field in the appropriate database table
-          // Check if this lead is from the warmLeads table or propertyManagerContacts table
-          // Using a simple check - if lead has a single email string, assume it's a warm lead
-          if (!Array.isArray(lead.email)) {
-            // This is likely a warm lead
-            await secondaryDb
-              .update(warmLeads)
-              .set({ lastEmailSentAt: new Date() })
-              .where(eq(warmLeads.id, lead.id));
-
-            console.log(`Updated lastEmailSentAt for warm lead ${lead.id}`);
-          } else {
-            // This is likely a property manager
-            await secondaryDb
-              .update(propertyManagerContacts)
-              .set({ lastEmailSentAt: new Date() })
-              .where(eq(propertyManagerContacts.id, lead.id));
-
-            console.log(`Updated lastEmailSentAt for property manager ${lead.id}`);
-          }
-        } catch (err) {
-          console.error(`Error adding lead ${lead.id} to campaign:`, err);
-        }
-      }
-    }
-
-    // Track this campaign for future reference
-    if (input.locationFilter) {
-      trackCampaignCreation(
-        campaignId,
-        {
-          lat: input.locationFilter.lat,
-          lng: input.locationFilter.lng,
-          radiusKm: input.locationFilter.radiusKm ?? 10
-        },
-        allLeads.length
-      );
-    }
-
-    // Check if campaign is already running
-    try {
-      const campaignStatusResponse = await fetch(`https://api.instantly.ai/api/v2/campaigns/${campaignId}`, {
-        method: "GET",
+    // Only proceed if we have leads to add
+    if (allLeads.length === 0) {
+      console.log('No leads to add to campaign, deleting campaign');
+      await fetch(`https://api.instantly.ai/api/v2/campaigns/${campaignId}`, {
+        method: "DELETE",
         headers: {
           "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
           "Content-Type": "application/json",
-        }
+        },
       });
+      return null;
+    }
 
-      if (campaignStatusResponse.ok) {
-        const campaignStatus = await campaignStatusResponse.json() as { status: string };
-        const isRunning = campaignStatus.status === "running";
+    // Add the leads to the campaign
+    for (const lead of allLeads) {
+      if (!lead.email) {
+        console.log(`Skipping lead ${lead.id} due to missing email.`);
+        continue;
+      }
 
-        // Only start the campaign if it's not already running and has leads
-        if (!isRunning && allLeads.length > 0) {
-          const startCampaignResponse = await fetch(`https://api.instantly.ai/api/v2/campaign/${campaignId}/start`, {
+      try {
+        // Handle both string and array email formats
+        const emails = Array.isArray(lead.email) ? lead.email : [lead.email];
+
+        for (const email of emails) {
+          if (!email) continue;
+
+          const addLeadResponse = await fetch("https://api.instantly.ai/api/v2/leads", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({})
+            body: JSON.stringify({
+              campaign: campaignId,
+              email: email,
+              // Add any other lead parameters as needed
+              custom_variables: input.customVariables ?? {},
+            }),
           });
 
-          if (!startCampaignResponse.ok) {
-            console.error("Failed to start campaign:", await startCampaignResponse.text());
-          } else {
-            console.log(`Successfully started campaign ${campaignId}`);
+          if (!addLeadResponse.ok) {
+            console.error(`Failed to add lead ${lead.id} with email ${email} to campaign:`, await addLeadResponse.text());
+            continue;
           }
-        } else if (allLeads.length === 0) {
-          console.log(`Skipping campaign start - no leads to process`);
-        } else {
-          console.log(`Campaign ${campaignId} is already running`);
+
+          console.log(`Added lead with email ${email} to campaign`);
         }
+
+        // Update the lastEmailSentAt field in the appropriate database table
+        // Check if this lead is from the warmLeads table or propertyManagerContacts table
+        // Using a simple check - if lead has a single email string, assume it's a warm lead
+        if (!Array.isArray(lead.email)) {
+          // This is likely a warm lead
+          await secondaryDb
+            .update(warmLeads)
+            .set({ lastEmailSentAt: new Date() })
+            .where(eq(warmLeads.id, lead.id));
+
+          console.log(`Updated lastEmailSentAt for warm lead ${lead.id}`);
+        } else {
+          // This is likely a property manager
+          await secondaryDb
+            .update(propertyManagerContacts)
+            .set({ lastEmailSentAt: new Date() })
+            .where(eq(propertyManagerContacts.id, lead.id));
+
+          console.log(`Updated lastEmailSentAt for property manager ${lead.id}`);
+        }
+      } catch (err) {
+        console.error(`Error adding lead ${lead.id} to campaign:`, err);
+      }
+    }
+
+    // Start the campaign
+    try {
+      const startCampaignResponse = await fetch(`https://api.instantly.ai/api/v2/campaign/${campaignId}/start`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({})
+      });
+
+      if (!startCampaignResponse.ok) {
+        console.error("Failed to start campaign:", await startCampaignResponse.text());
+      } else {
+        console.log(`Successfully started campaign ${campaignId}`);
       }
     } catch (err) {
-      console.error("Error checking/starting campaign:", err);
+      console.error("Error starting campaign:", err);
     }
 
     console.log(`Successfully processed Instantly.ai campaign with ID: ${campaignId} and added ${allLeads.length} leads.`);
