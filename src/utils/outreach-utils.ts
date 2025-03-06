@@ -277,13 +277,17 @@ interface CreateInstantlyCampaignInput {
     endDate?: Date; // Optional end date for the campaign
   };
   forceCampaign?: boolean; // Force creation of a new campaign even if cooldown period hasn't elapsed
+  onlyWarmLeads?: boolean; // Only add warm leads to the campaign
   sequences?: {
     steps: {
-      subject: string;
-      body: string;
+      type: string;
       delay: number;
+      variants: {
+        subject: string;
+        body: string;
+      }[];
     }[];
-  };
+  }[];
 }
 // List of valid Instantly.ai timezone values
 const VALID_INSTANTLY_TIMEZONES = [
@@ -444,10 +448,19 @@ export async function createInstantlyCampaign(
           start_date?: string;
           end_date?: string;
         };
-        // Add one-time campaign settings
+        sequences: Array<{
+          steps: Array<{
+            type: string;
+            delay: number;
+            variants: Array<{
+              subject: string;
+              body: string;
+            }>;
+          }>;
+        }>;
         is_evergreen: boolean;
-        email_gap: number; // Send emails close together
-        random_wait_max: number; // Small random wait time
+        email_gap: number;
+        random_wait_max: number;
       };
 
       const campaignPayload: CampaignPayload = {
@@ -464,16 +477,16 @@ export async function createInstantlyCampaign(
               timezone: timezone
             }
           ],
-          // Set start date to today
           start_date: now.toISOString(),
-          // Set end date to tomorrow to ensure it's a one-time send
           end_date: tomorrow.toISOString()
         },
-        // Set this to false for one-time campaign (not evergreen)
+        sequences: [
+          {
+            steps: input.sequences?.[0]?.steps ?? []
+          }
+        ],
         is_evergreen: false,
-        // Send emails closer together (5 minutes between emails)
         email_gap: 5,
-        // Small random wait time (2 minutes max)
         random_wait_max: 2
       };
 

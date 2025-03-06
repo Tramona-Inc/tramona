@@ -266,97 +266,21 @@ export async function handleRequestSubmission(
   // This way, even if it fails, the request submission will have already been completed
   const campaignPromise = (async () => {
     try {
-      const lat = input.lat;
-      const lng = input.lng;
-      const radius = input.radius;
-      const requestId = transactionResults.requestId;
-      const requestedPoint = createLatLngGISPoint({ lat: lat ?? 0, lng: lng ?? 0 });
-
-      // Check for existing property managers
-      const propertyManagers = await secondaryDb.execute(sql`
+      // First check if we have ANY existing property managers in this city (regardless of last contact)
+      const existingPMQuery = await secondaryDb.execute(sql`
         SELECT COUNT(*) as count
         FROM property_manager_contacts
-        WHERE lat_lng_point IS NOT NULL
-        AND ST_DWithin(
-          ST_Transform(lat_lng_point, 3857),
-          ST_Transform(${requestedPoint}, 3857),
-          ${(radius ?? 10) * 1000}
-        )
+        WHERE city = ${input.location}
+        AND lat_lng_point IS NOT NULL
       `);
 
-      const pmCount = Number(propertyManagers[0]?.count ?? 0);
-      console.log(`Found ${pmCount} property managers in the requested location.`);
+      const existingPMCount = Number(existingPMQuery[0]?.count ?? 0);
+      console.log(`Found ${existingPMCount} total existing property managers in ${input.location}`);
 
-      const baseUrl = "https://www.tramona.com";
-      const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
-      const emailBody = `
-        Tramona: New Booking Request for ${input.location}
+      let shouldRunScraper = existingPMCount === 0;
 
-        We have a new booking request for your property in ${input.location}!
-
-        Request Details:
-        Location: ${input.location}
-        Dates: ${fmtdDateRange}
-        Number of guests: ${plural(input.numGuests ?? 1, "guest")}
-        Potential earnings for your empty night: ${input.maxTotalPrice ? formatCurrency(input.maxTotalPrice) : "N/A"}
-
-        What is Tramona?
-
-        1. Tramona is the only OTA built to supplement other booking channels, and fill your empty nights
-        2. Tramona charges 5-10% less in fees so every booking puts more in your pocket
-        3. All bookings come with $50,000 of protection.
-        4. Sign up instantly, with our direct Airbnb connection. This auto connects your calendars, pricing, properties and anything else on Airbnb
-
-        Log in now to review and accept this booking request at: ${baseUrl}/request-preview/${requestId}
-
-        Not quite the booking you're looking for? No worries! We have travelers making requests every day.
-
-        Questions about this request?
-        Email us at info@tramona.com
-        `.trim();
-
-      // Create campaign immediately (no emails yet)
-      const campaignId = await createInstantlyCampaign({
-        campaignName: `Booking Request: ${input.location} ${formatDateRange(input.checkIn, input.checkOut)}`,
-        locationFilter: {
-          lat: lat ?? 0,
-          lng: lng ?? 0,
-          radiusKm: radius ?? 0,
-        },
-        customVariables: {
-          requestLocation: input.location,
-          requestId: requestId.toString(),
-          checkInDate: input.checkIn.toISOString(),
-          checkOutDate: input.checkOut.toISOString(),
-          numGuests: input.numGuests ?? 1,
-          pricePerNight: pricePerNight,
-          totalPrice: input.maxTotalPrice,
-          numNights: getNumNights(input.checkIn, input.checkOut),
-        },
-        scheduleOptions: {
-          startTime: "09:00",
-          endTime: "20:00",
-          startDate: new Date(),
-        },
-        sequences: {
-          steps: [
-            {
-              subject: `Booking Request for ${input.location}`,
-              body: emailBody,
-              delay: 0
-            }
-          ]
-        }
-      });
-
-      if (!campaignId) {
-        throw new Error("Failed to create Instantly.ai campaign - no campaign ID returned");
-      }
-      console.log(`Created Instantly.ai campaign ${campaignId} for request ${requestId}`);
-
-      // Trigger scraper and incrementally add emails
-      if (pmCount === 0) {
-        console.log(`No property managers found for ${input.location}, triggering scraper...`);
+      if (shouldRunScraper) {
+        console.log(`No existing leads found for ${input.location}, triggering scraper...`);
         try {
           const scraperResponse = await fetch("https://googlescrape.onrender.com/scrape", {
             method: "POST",
@@ -372,72 +296,23 @@ export async function handleRequestSubmission(
           const result = await scraperResponse.json() as ScraperResponse;
           console.log(`Scheduled property manager scraping for ${input.location}: ${result.message}`);
 
-          // Poll Supabase for 3 minutes, adding emails incrementally
+          // Wait for scraper to finish and add new leads (3 minute timeout)
           const startTime = Date.now();
-          const addedEmails = new Set<string>(); // Track added emails to avoid duplicates
-
           while (Date.now() - startTime < 180000) { // 3-minute window
-            const queryResult = await secondaryDb.execute(sql`
-              SELECT email
+            const newPMQuery = await secondaryDb.execute(sql`
+              SELECT COUNT(*) as count
               FROM property_manager_contacts
               WHERE city = ${input.location}
+              AND lat_lng_point IS NOT NULL
             `);
 
-            const propertyManagers = queryResult.map(row => ({
-              email: row.email as string | string[]
-            })) as PropertyManagerEmail[];
-
-            if (propertyManagers.length > 0) {
-              const newEmails = propertyManagers
-                .map(row => Array.isArray(row.email) ? row.email : [row.email])
-                .flat()
-                .filter((email): email is string =>
-                  typeof email === 'string' &&
-                  email.includes('@') &&
-                  !addedEmails.has(email)
-                );
-
-              if (newEmails.length > 0) {
-                try {
-                  const addEmailsResponse = await fetch("https://api.instantly.ai/api/v2/leads/bulk", {
-                    method: "POST",
-                    headers: {
-                      "Authorization": `Bearer ${process.env.INSTANTLY_API_KEY}`,
-                      "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                      campaign_id: campaignId,
-                      leads: newEmails.map(email => ({ email }))
-                    })
-                  });
-
-                  if (!addEmailsResponse.ok) {
-                    const errorData = await addEmailsResponse.json() as { message?: string };
-                    throw new Error(errorData.message ?? "Failed to add emails");
-                  }
-
-                  newEmails.forEach(email => addedEmails.add(email));
-                  console.log(`Added ${newEmails.length} new emails to campaign ${campaignId}. Total: ${addedEmails.size}`);
-                } catch (addError) {
-                  console.error(`Error adding emails to campaign ${campaignId}:`, addError);
-                  void sendSlackMessage({
-                    isProductionOnly: true,
-                    channel: "tramona-errors",
-                    text: [
-                      `*Error adding emails to campaign ${campaignId} for request ${transactionResults.requestId}*`,
-                      `Location: ${input.location}`,
-                      `Error: ${String(addError)}`,
-                    ].join("\n"),
-                  });
-                }
-              }
+            const newPMCount = Number(newPMQuery[0]?.count ?? 0);
+            if (newPMCount > existingPMCount) {
+              console.log(`Scraper found ${newPMCount - existingPMCount} new leads`);
+              break;
             }
 
             await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5s
-          }
-
-          if (addedEmails.size === 0) {
-            console.warn(`No emails added to campaign ${campaignId} after polling`);
           }
         } catch (scraperError) {
           console.error(`Error scheduling scraper:`, scraperError);
@@ -451,6 +326,103 @@ export async function handleRequestSubmission(
             ].join("\n"),
           });
         }
+      }
+
+      // Check for contactable leads (warm leads with no contact or PMs not contacted in 3 days)
+      const warmLeadsQuery = await secondaryDb.execute(sql`
+        SELECT COUNT(*) as count
+        FROM warm_leads wl
+        JOIN cities c ON c.warm_lead_id = wl.id
+        WHERE c.name = ${input.location}
+        AND (wl.last_email_sent_at IS NULL OR wl.last_email_sent_at < NOW() - INTERVAL '3 days')
+      `);
+
+      const recentPMQuery = await secondaryDb.execute(sql`
+        SELECT COUNT(*) as count
+        FROM property_manager_contacts
+        WHERE city = ${input.location}
+        AND lat_lng_point IS NOT NULL
+        AND (last_email_sent_at IS NULL OR last_email_sent_at < NOW() - INTERVAL '3 days')
+      `);
+
+      const newWarmLeadsCount = Number(warmLeadsQuery[0]?.count ?? 0);
+      const contactablePMCount = Number(recentPMQuery[0]?.count ?? 0);
+
+      console.log(`Found ${newWarmLeadsCount} new warm leads and ${contactablePMCount} contactable property managers in ${input.location}`);
+
+      // Only create campaign if we have contactable leads
+      if (newWarmLeadsCount > 0 || contactablePMCount > 0) {
+        // Now create the campaign and add leads
+        const campaignId = await createInstantlyCampaign({
+          campaignName: `Booking Request: ${input.location} ${formatDateRange(input.checkIn, input.checkOut)}`,
+          locationFilter: {
+            lat: input.lat ?? 0,
+            lng: input.lng ?? 0,
+            radiusKm: input.radius ?? 10,
+          },
+          customVariables: {
+            requestLocation: input.location,
+            requestId: transactionResults.requestId.toString(),
+            checkInDate: input.checkIn.toISOString(),
+            checkOutDate: input.checkOut.toISOString(),
+            numGuests: input.numGuests ?? 1,
+            pricePerNight: pricePerNight,
+            totalPrice: input.maxTotalPrice,
+            numNights: getNumNights(input.checkIn, input.checkOut),
+          },
+          scheduleOptions: {
+            startTime: "09:00",
+            endTime: "20:00",
+            startDate: new Date(),
+          },
+          // If we only have warm leads, only add those
+          onlyWarmLeads: contactablePMCount === 0 && newWarmLeadsCount > 0,
+          sequences: [{
+            steps: [
+              {
+                type: "email",
+                delay: 0,
+                variants: [
+                  {
+                    subject: `Booking Request for ${input.location}`,
+                    body: `
+                      Tramona: New Booking Request for ${input.location}
+
+                      We have a new booking request for your property in ${input.location}!
+
+                      Request Details:
+                      Location: ${input.location}
+                      Dates: ${formatDateRange(input.checkIn, input.checkOut)}
+                      Number of guests: ${plural(input.numGuests ?? 1, "guest")}
+                      Potential earnings for your empty night: ${input.maxTotalPrice ? formatCurrency(input.maxTotalPrice) : "N/A"}
+
+                      What is Tramona?
+
+                      1. Tramona is the only OTA built to supplement other booking channels, and fill your empty nights
+                      2. Tramona charges 5-10% less in fees so every booking puts more in your pocket
+                      3. All bookings come with $50,000 of protection.
+                      4. Sign up instantly, with our direct Airbnb connection. This auto connects your calendars, pricing, properties and anything else on Airbnb
+
+                      Log in now to review and accept this booking request at: https://tramona.com/request-preview/${transactionResults.requestId}
+
+                      Not quite the booking you're looking for? No worries! We have travelers making requests every day.
+
+                      Questions about this request?
+                      Email us at info@tramona.com
+                    `.trim(),
+                  }
+                ]
+              }
+            ]
+          }]
+        });
+
+        if (!campaignId) {
+          throw new Error("Failed to create Instantly.ai campaign - no campaign ID returned");
+        }
+        console.log(`Created Instantly.ai campaign ${campaignId} for request ${transactionResults.requestId}`);
+      } else {
+        console.log(`No contactable leads found for ${input.location}, skipping campaign creation`);
       }
 
     } catch (error) {
