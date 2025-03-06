@@ -8,7 +8,8 @@ type Channel =
   | "tramona-bot"
   | "host-bot"
   | "admin-messaging"
-  | "chatbox";
+  | "chatbox"
+  | "tramona-errors";
 
 // prettier-ignore
 const channelIdMap = {
@@ -17,6 +18,7 @@ const channelIdMap = {
   "host-bot": "C07H794S24U",
   "admin-messaging": "C07LZRBCUBX",
   "chatbox": "C07M339S811",
+  "tramona-errors": "C08FFCSD16F",
 };
 
 const isProduction = process.env.NODE_ENV === "production";
