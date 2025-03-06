@@ -2,13 +2,14 @@ import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
 import { secondaryDb } from "@/server/db";
 import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
-import { propertyManagerContactsTest as propertyManagerContacts, propertyManagerContactsTest } from "@/server/db/secondary-schema";
+import { propertyManagerContacts, propertyManagerContactsTest } from "@/server/db/secondary-schema";
 import { cities } from "@/server/db/secondary-schema/cities";
 import { warmLeads } from "@/server/db/secondary-schema/warmLeads";
 //import { propertyManagerContacts } from "@/server/db/secondary-schema";
 
 // Add the import for the fetch API for making HTTP requests to the Instantly.ai API
 import { env } from "@/env";
+import axios, { AxiosError } from 'axios';
 
 // Add the proper type import for the property managers table
 import { PropertyManagerContact } from "@/server/db/schema/tables/outreach";
@@ -45,7 +46,7 @@ export async function emailPMFromCityRequest(
   try {
     const requestedPoint = sql`ST_SetSRID(ST_MakePoint(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326)`;
     const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
-    const transformedLatLngPoint = sql`ST_Transform(lat_lng_point, 3857)`;
+    const transformedLatLngPoint = sql`ST_Transform(ST_SetSRID(lat_lng_point::geometry, 4326), 3857)`;
 
     const nearbyProperyManagers = await secondaryDb
       .select({
@@ -61,7 +62,7 @@ export async function emailPMFromCityRequest(
           )
         `.as("distance_meters"),
       })
-      .from(propertyManagerContactsTest)
+      .from(propertyManagerContacts)
       .where(
         sql`
           lat_lng_point IS NOT NULL
@@ -172,7 +173,7 @@ export async function emailWarmLeadsFromCityRequest(
   try {
     const requestedPoint = sql`ST_SetSRID(ST_MakePoint(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326)`;
     const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
-    const transformedLatLngPoint = sql`ST_Transform(cities.lat_lng_point, 3857)`;
+    const transformedLatLngPoint = sql`ST_Transform(ST_SetSRID(cities.lat_lng_point::geometry, 4326), 3857)`;
 
     const warmLeadsToEmail = await secondaryDb
       .select({
@@ -436,7 +437,7 @@ export async function createInstantlyCampaign(
       const { lat, lng, radiusKm = 10 } = input.locationFilter;
       const requestedPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
       const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
-      const transformedLatLngPoint = sql`ST_Transform(cities.lat_lng_point, 3857)`;
+      const transformedLatLngPoint = sql`ST_Transform(ST_SetSRID(cities.lat_lng_point::geometry, 4326), 3857)`;
 
       void queryBuilder.where(
         sql`EXISTS (
@@ -446,7 +447,7 @@ export async function createInstantlyCampaign(
           AND ST_DWithin(
             ${transformedLatLngPoint},
             ${transformedInputPoint},
-            ${radiusKm * 1000} -- Convert km to meters
+            ${radiusKm}
           )
         )`
       );
@@ -480,14 +481,20 @@ export async function createInstantlyCampaign(
           email: propertyManagerContacts.email,
           lastEmailSentAt: propertyManagerContacts.lastEmailSentAt,
           type: sql<'property_manager'>`'property_manager'::text`.as('type'),
+          distanceMeters: sql<number>`
+            ST_Distance(
+              ST_Transform(ST_SetSRID(${propertyManagerContacts}.lat_lng_point::geometry, 4326), 3857),
+              ${transformedInputPoint}
+            )
+          `.as('distance_meters'),
         })
         .from(propertyManagerContacts)
         .where(
           sql`${propertyManagerContacts}.lat_lng_point IS NOT NULL
               AND ST_DWithin(
-                ST_Transform(${propertyManagerContacts}.lat_lng_point, 3857),
+                ST_Transform(ST_SetSRID(${propertyManagerContacts}.lat_lng_point::geometry, 4326), 3857),
                 ${transformedInputPoint},
-                ${radiusKm * 1000}
+                ${radiusKm}
               )`
         );
 
@@ -514,17 +521,17 @@ export async function createInstantlyCampaign(
     const allLeads = [...warmLeadsToAdd, ...propertyManagersToAdd];
 
     // Only proceed if we have leads to add
-    if (allLeads.length === 0) {
-      console.log('No leads to add to campaign, deleting campaign');
-      await fetch(`https://api.instantly.ai/api/v2/campaigns/${campaignId}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      });
-      return null;
-    }
+    // if (allLeads.length === 0) {
+    //   console.log('No leads to add to campaign, deleting campaign');
+    //   await fetch(`https://api.instantly.ai/api/v2/campaigns/${campaignId}`, {
+    //     method: "DELETE",
+    //     headers: {
+    //       "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
+    //   return null;
+    // }
 
     // First, update lastEmailSentAt for all leads
     const updatePromises: Promise<unknown>[] = [];
@@ -597,22 +604,31 @@ export async function createInstantlyCampaign(
 
     // Start the campaign
     try {
-      const startCampaignResponse = await fetch(`https://api.instantly.ai/api/v2/campaign/${campaignId}/start`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({})
-      });
+      console.log(`Starting campaign ${campaignId} with Instantly.ai API...`);
+      const startResponse = await fetch(
+        `https://api.instantly.ai/api/v2/campaigns/${campaignId}/activate`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.INSTANTLY_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}), // Add empty JSON object as body
+        }
+      );
 
-      if (!startCampaignResponse.ok) {
-        console.error("Failed to start campaign:", await startCampaignResponse.text());
+      if (!startResponse.ok) {
+        const errorData = await startResponse.text();
+        console.error(`Failed to activate campaign ${campaignId}:`, {
+          status: startResponse.status,
+          statusText: startResponse.statusText,
+          data: errorData
+        });
       } else {
-        console.log(`Successfully started campaign ${campaignId}`);
+        console.log(`Successfully activated campaign ${campaignId}`);
       }
-    } catch (err) {
-      console.error("Error starting campaign:", err);
+    } catch (error) {
+      console.error(`Error activating campaign ${campaignId}:`, error);
     }
 
     console.log(`Successfully processed Instantly.ai campaign with ID: ${campaignId} and added ${allLeads.length} leads.`);
