@@ -276,32 +276,31 @@ export async function handleRequestSubmission(
                     delay: 0,
                     variants: [
                       {
-                        subject: `Booking Request for ${input.location}`,
-                        body: `
-                          Tramona: New Booking Request for ${input.location}
-
-                          We have a new booking request for your property in ${input.location}!
-
-                          Request Details:
-                          Location: ${input.location}
-                          Dates: ${formatDateRange(input.checkIn, input.checkOut)}
-                          Number of guests: ${plural(input.numGuests ?? 1, "guest")}
-                          Potential earnings for your empty night: ${input.maxTotalPrice ? formatCurrency(input.maxTotalPrice) : "N/A"}
-
-                          What is Tramona?
-
-                          1. Tramona is the only OTA built to supplement other booking channels, and fill your empty nights
-                          2. Tramona charges 5-10% less in fees so every booking puts more in your pocket
-                          3. All bookings come with $50,000 of protection.
-                          4. Sign up instantly, with our direct Airbnb connection. This auto connects your calendars, pricing, properties and anything else on Airbnb
-
-                          Log in now to review and accept this booking request at: https://tramona.com/request-preview/${request.id}
-
-                          Not quite the booking you're looking for? No worries! We have travelers making requests every day.
-
-                          Questions about this request?
-                          Email us at info@tramona.com
-                        `.trim(),
+                        subject: `Tramona: Booking Request for ${input.location}`,
+                        body: [
+                          `We have a new booking request for your property in ${input.location}!`,
+                          ``,
+                          `Request Details:`,
+                          `Location: ${input.location}`,
+                          `Dates: ${formatDateRange(input.checkIn, input.checkOut)}`,
+                          `Number of guests: ${plural(input.numGuests ?? 1, "guest")}`,
+                          `Potential earnings for your empty night: ${input.maxTotalPrice ? formatCurrency(input.maxTotalPrice) : "N/A"}`,
+                          ``,
+                          `What is Tramona?`,
+                          ``,
+                          `1. Tramona is the only OTA built to supplement other booking channels, and fill your empty nights`,
+                          `2. Tramona charges 5-10% less in fees so every booking puts more in your pocket`,
+                          `3. All bookings come with $50,000 of protection.`,
+                          `4. Sign up instantly, with our direct Airbnb connection. This auto connects your calendars, pricing, properties and anything else on Airbnb`,
+                          ``,
+                          `Log in now to review and accept this booking request at: https://tramona.com/request-preview/${request.id}`,
+                          ``,
+                          `Not quite the booking you're looking for? No worries! We have travelers making requests every day.`,
+                          ``,
+                          `Questions about this request?`,
+                          ``,
+                          `Email us at info@tramona.com`
+                        ].join('\n')
                       }
                     ]
                   }
