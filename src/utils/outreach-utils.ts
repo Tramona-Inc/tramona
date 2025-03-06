@@ -413,12 +413,21 @@ export async function createInstantlyCampaign(
 
     console.log(`Created new Instantly.ai campaign with ID: ${campaignId}`);
 
-    // Now query for leads to add to the campaign
+    // Query for leads to add to the campaign
+    type LeadInfo = {
+      id: number;
+      email: string | string[] | null;
+      lastEmailSentAt: Date | null;
+      type: 'warm_lead' | 'property_manager';
+    };
+
+    // Query warm leads
     const queryBuilder = secondaryDb
       .select({
         id: warmLeads.id,
         email: warmLeads.email,
         lastEmailSentAt: warmLeads.lastEmailSentAt,
+        type: sql<'warm_lead'>`'warm_lead'::text`.as('type'),
       })
       .from(warmLeads);
 
@@ -456,20 +465,13 @@ export async function createInstantlyCampaign(
 
     console.log(`Found ${warmLeadsToAdd.length} warm leads to add to Instantly.ai campaign`);
 
-    // Query property manager contacts based on the same location filter
-    type LeadInfo = {
-      id: number;
-      email: string | string[] | null;
-      lastEmailSentAt: Date | null;
-    };
-
+    // Query property manager contacts
     let propertyManagersToAdd: LeadInfo[] = [];
 
     if (input.locationFilter && !input.onlyWarmLeads) {
       const { lat, lng, radiusKm = 10 } = input.locationFilter;
       const requestedPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
       const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
-      const transformedPMLatLngPoint = sql`ST_Transform(property_manager_contacts.lat_lng_point, 3857)`;
 
       // Query property managers within the radius
       const pmQueryBuilder = secondaryDb
@@ -477,6 +479,7 @@ export async function createInstantlyCampaign(
           id: propertyManagerContacts.id,
           email: propertyManagerContacts.email,
           lastEmailSentAt: propertyManagerContacts.lastEmailSentAt,
+          type: sql<'property_manager'>`'property_manager'::text`.as('type'),
         })
         .from(propertyManagerContacts)
         .where(
@@ -492,7 +495,7 @@ export async function createInstantlyCampaign(
       const skipRecentlyContacted = input.skipRecentlyContacted !== false;
       let propertyManagerResults = await pmQueryBuilder.limit(maxLeads);
 
-      // Filter out recently contacted property managers if needed (in JavaScript instead of SQL)
+      // Filter out recently contacted property managers if needed
       if (skipRecentlyContacted) {
         const threeDaysAgo = new Date();
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
@@ -507,7 +510,7 @@ export async function createInstantlyCampaign(
       console.log(`Found ${propertyManagersToAdd.length} property managers to add to Instantly.ai campaign`);
     }
 
-    // Combine both lead sources - if there's an overlap, the warm leads take precedence
+    // Combine both lead sources
     const allLeads = [...warmLeadsToAdd, ...propertyManagersToAdd];
 
     // Only proceed if we have leads to add
@@ -523,7 +526,34 @@ export async function createInstantlyCampaign(
       return null;
     }
 
-    // Add the leads to the campaign
+    // First, update lastEmailSentAt for all leads
+    const updatePromises: Promise<unknown>[] = [];
+
+    for (const lead of allLeads) {
+      if (!lead.email) continue;
+
+      if (lead.type === 'warm_lead') {
+        updatePromises.push(
+          secondaryDb
+            .update(warmLeads)
+            .set({ lastEmailSentAt: now })
+            .where(eq(warmLeads.id, lead.id))
+        );
+      } else {
+        updatePromises.push(
+          secondaryDb
+            .update(propertyManagerContacts)
+            .set({ lastEmailSentAt: now })
+            .where(eq(propertyManagerContacts.id, lead.id))
+        );
+      }
+    }
+
+    // Wait for all updates to complete
+    await Promise.all(updatePromises);
+    console.log(`Updated lastEmailSentAt for ${updatePromises.length} leads`);
+
+    // Now add leads to the campaign
     for (const lead of allLeads) {
       if (!lead.email) {
         console.log(`Skipping lead ${lead.id} due to missing email.`);
@@ -546,8 +576,10 @@ export async function createInstantlyCampaign(
             body: JSON.stringify({
               campaign: campaignId,
               email: email,
-              // Add any other lead parameters as needed
-              custom_variables: input.customVariables ?? {},
+              custom_variables: {
+                ...input.customVariables ?? {},
+                lead_type: lead.type,
+              },
             }),
           });
 
@@ -556,28 +588,7 @@ export async function createInstantlyCampaign(
             continue;
           }
 
-          console.log(`Added lead with email ${email} to campaign`);
-        }
-
-        // Update the lastEmailSentAt field in the appropriate database table
-        // Check if this lead is from the warmLeads table or propertyManagerContacts table
-        // Using a simple check - if lead has a single email string, assume it's a warm lead
-        if (!Array.isArray(lead.email)) {
-          // This is likely a warm lead
-          await secondaryDb
-            .update(warmLeads)
-            .set({ lastEmailSentAt: new Date() })
-            .where(eq(warmLeads.id, lead.id));
-
-          console.log(`Updated lastEmailSentAt for warm lead ${lead.id}`);
-        } else {
-          // This is likely a property manager
-          await secondaryDb
-            .update(propertyManagerContacts)
-            .set({ lastEmailSentAt: new Date() })
-            .where(eq(propertyManagerContacts.id, lead.id));
-
-          console.log(`Updated lastEmailSentAt for property manager ${lead.id}`);
+          console.log(`Added ${lead.type} with email ${email} to campaign`);
         }
       } catch (err) {
         console.error(`Error adding lead ${lead.id} to campaign:`, err);
