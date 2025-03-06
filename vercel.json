@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/cron/cleanup-instantly-campaigns",
+      "schedule": "0 0 * * *"
+    },
+    {
       "path": "/api/cron/sendWarmLeadsEmails",
       "schedule": "*/10 * * * *"
     },

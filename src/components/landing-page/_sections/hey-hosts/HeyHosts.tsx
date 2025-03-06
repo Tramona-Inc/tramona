@@ -12,11 +12,15 @@ import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence } from "framer-motion";
 
-interface FormData {
-  email: string;
-  cities: string[];
+interface CityData {
+  name: string;
   stateCode: string;
   country: string;
+}
+
+interface FormData {
+  email: string;
+  cities: CityData[];
 }
 
 export default function HeyHosts() {
@@ -31,15 +35,13 @@ export default function HeyHosts() {
     defaultValues: {
       email: "",
       cities: [],
-      stateCode: "",
-      country: "",
     },
     mode: "onChange",
   });
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [newCity, setNewCity] = useState("");
-  const [cities, setCities] = useState<Set<string>>(new Set());
+  const [cities, setCities] = useState<CityData[]>([]);
 
   const cityAutocompleteRef = useRef<HTMLInputElement>(null);
   const { mutate: insertWarmLead } = api.outreach.insertWarmLead.useMutation({
@@ -58,21 +60,23 @@ export default function HeyHosts() {
     }
     if (cityToAdd.trim()) {
       // Split city details, expecting "city,stateCode,country"
-      const [city, stateCode, country] = cityToAdd.split(",").map(s => s.trim());
-      if (city && !cities.has(city)) {
-        // Create a new Set to trigger state update
-        const newCities = new Set(cities);
-        newCities.add(city);
-        setCities(newCities);
-        // Update the form state using an array derived from the Set
-        setValue("cities", Array.from(newCities));
+      const [cityName, stateCode, country] = cityToAdd
+        .split(",")
+        .map((s) => s.trim());
+      if (cityName && !cities.some((city) => city.name === cityName)) {
+        // Create a new city object
+        const newCityData: CityData = {
+          name: cityName,
+          stateCode: stateCode ?? "",
+          country: country ?? "",
+        };
 
-        if (stateCode) {
-          setValue("stateCode", stateCode);
-        }
-        if (country) {
-          setValue("country", country);
-        }
+        // Update cities array
+        const updatedCities = [...cities, newCityData];
+        setCities(updatedCities);
+
+        // Update the form state
+        setValue("cities", updatedCities);
       }
       setNewCity("");
       setPopoverOpen(false);
@@ -81,24 +85,20 @@ export default function HeyHosts() {
   };
 
   const handleRemoveCity = (index: number) => {
-    const citiesArray = Array.from(cities);
-    if (index >= 0 && index < citiesArray.length) {
-      const cityToRemove = citiesArray[index];
-      if (cityToRemove) {
-        // Create a new Set and remove the selected city
-        const newCities = new Set(cities);
-        newCities.delete(cityToRemove);
-        setCities(newCities);
-        // Update the form state with the updated array of cities
-        setValue("cities", Array.from(newCities));
-      }
+    if (index >= 0 && index < cities.length) {
+      // Create a new array without the removed city
+      const updatedCities = cities.filter((_, i) => i !== index);
+      setCities(updatedCities);
+      // Update the form state
+      setValue("cities", updatedCities);
     }
   };
 
   const onSubmit = (data: FormData) => {
+    console.log("Submitting form with data:", data);
     insertWarmLead(data);
-    // Clear cities by resetting the set
-    setCities(new Set());
+    // Clear cities
+    setCities([]);
     setValue("cities", []);
     setValue("email", "");
     setNewCity("");
@@ -167,9 +167,9 @@ export default function HeyHosts() {
               {/* City List */}
               <div className="flex max-h-[80px] min-h-[40px] flex-wrap gap-2 overflow-y-auto">
                 <AnimatePresence>
-                  {Array.from(cities).map((city, index) => (
+                  {cities.map((city, index) => (
                     <motion.div
-                      key={city}
+                      key={index}
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
@@ -179,7 +179,7 @@ export default function HeyHosts() {
                         variant="secondary"
                         className="flex items-center gap-2 px-2 py-1 text-xs"
                       >
-                        {city}
+                        {city.name}
                         <X
                           className="h-3 w-3 cursor-pointer hover:text-destructive"
                           onClick={() => handleRemoveCity(index)}
@@ -204,8 +204,7 @@ export default function HeyHosts() {
                     rules={{
                       required: "Email is required",
                       pattern: {
-                        value:
-                          /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                        value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                         message: "Invalid email format",
                       },
                     }}
