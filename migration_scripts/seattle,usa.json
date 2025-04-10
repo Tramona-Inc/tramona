@@ -1,0 +1,86 @@
+{
+    "positive": [
+      {
+        "template": "The {noun} was {positiveAdjective1} and {positiveAdjective2}!",
+        "probability": 0.8
+      },
+        {
+          "template": "I {positiveVerb} my stay, the {noun} was {positiveCleanliness}!",
+          "probability": 0.8
+        },
+      {
+        "template": "Everything was {positiveAdjective1}! We {positiveVerb} the {secondNoun}!",
+        "probability": 0.8
+      },
+      {
+        "template": "We {positiveVerb} the {noun} and the {secondNoun}! ",
+        "probability": 0.7
+      },
+       {
+         "template": "I would recommend this {noun} to anyone!",
+        "probability": 0.6
+      },
+         {
+           "template": "This is a very {positiveExperienceAdjective} place!",
+          "probability": 0.6
+        },
+         {
+           "template": "The {cityLocation} was {positiveAdjective1}!",
+          "probability": 0.6
+        },
+          {
+           "template": "I would come to the {cityLocation} again, it was {positiveAdjective1}!",
+          "probability": 0.6
+        }
+    ],
+    "negative": [
+      {
+        "template": "The {noun} was {negativeAdjective1} and {negativeAdjective2}.",
+        "probability": 0.8
+      },
+         {
+        "template": "I was very {negativeEmotion} with my stay! The {noun} was {negativeCleanliness}.",
+        "probability": 0.8
+      },
+       {
+         "template": "The {noun} was {negativeAdjective1}, and I {negativeVerb} the {secondNoun}!",
+        "probability": 0.8
+      },
+      {
+        "template": "I would not recommend this {noun}!",
+        "probability": 0.7
+      },
+        {
+          "template": "This place was {negativeExperienceAdjective}, I {negativeVerb} it!",
+           "probability": 0.7
+        }
+       ,  {
+          "template": "The {cityLocation} was {negativeAdjective1} and the {cityExperience} was {negativeAdjective1}!",
+           "probability": 0.7
+        }
+    ],
+     "neutral": [
+        {"template": "The {noun} was {neutralAdjective}, and the {secondNoun} was {neutralAdjective}."},
+        {"template": "The stay was just ok. The {noun} and {secondNoun} were {neutralAdjective}"},
+        {"template": "My experience was {neutralExperienceAdjective}, nothing special."},
+        {"template": "The {noun} was {neutralAdjective}, I wouldn't complain but I wouldn't recommend it either."}
+    ],
+     "positiveAdjective1": ["excellent","wonderful", "amazing", "fantastic", "great"],
+    "positiveAdjective2": ["clean", "tidy", "pristine", "spacious", "well-equipped"],
+    "positiveVerb": ["enjoyed", "loved", "appreciated", "liked", "had"],
+      "positiveCleanliness": ["immaculate", "spotless", "very clean", "pristine"],
+     "negativeAdjective1": ["terrible", "awful", "poor", "disappointing", "bad"],
+    "negativeAdjective2": ["unclean","dirty", "worn-out", "small", "dated"],
+    "negativeVerb": ["hated","disliked", "did not enjoy","regretted", "resented"],
+    "negativeCleanliness": ["filthy","dirty", "dusty", "unsanitary"],
+      "negativeEmotion": ["disappointed","upset", "frustrated","annoyed"],
+      "positiveExperienceAdjective": ["pleasant", "satisfying", "comfortable","memorable"],
+      "negativeExperienceAdjective": ["awful", "terrible", "disappointing","unpleasant"],
+       "neutralExperienceAdjective": ["average", "ok", "fine"],
+      "neutralAdjective": ["adequate","acceptable","fair"],
+         "cityLocation": ["location", "area", "neighborhood", "downtown", "ballard", "capitol hill"],
+        "cityFood": ["restaurants", "food", "eateries", "cafes", "bars", "seafood", "coffee"],
+           "cityExperience":["nightlife", "activities", "tourist attractions", "space needle", "pike place market", "museums"],
+    "nouns": ["location", "room", "amenities", "service", "staff", "bed","view", "pool"],
+    "secondNoun": ["bathroom", "kitchen", "internet", "parking", "breakfast", "host"]
+}
