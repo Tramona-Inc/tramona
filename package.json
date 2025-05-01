@@ -64,7 +64,7 @@
     "@react-email/render": "^0.0.17",
     "@react-email/tailwind": "^0.1.0",
     "@slack/web-api": "^7.0.2",
-    "@stripe/connect-js": "3.3.13",
+    "@stripe/connect-js": "3.3.23",
     "@stripe/react-connect-js": "3.3.14",
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.4.0",
