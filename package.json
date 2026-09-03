@@ -111,7 +111,7 @@
     "drizzle-zod": "^0.5.1",
     "embla-carousel-autoplay": "8.1.8",
     "embla-carousel-react": "8.1.8",
-    "framer-motion": "^11.2.11",
+    "motion": "^11.2.11",
     "fs": "0.0.1-security",
     "html2canvas": "^1.4.1",
     "https": "^1.0.0",
