@@ -161,7 +161,7 @@
     "stripe": "^16.2.0",
     "supabase": "^1.183.5",
     "superjson": "^2.2.1",
-    "swiper": "^11.1.3",
+    "swiper": "^12.0.0",
     "tailwind-merge": "^2.3.0",
     "tailwind-scrollbar-hide": "^1.1.7",
     "tailwindcss-animate": "^1.0.7",
