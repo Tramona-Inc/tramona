@@ -126,7 +126,7 @@
     "multer": "1.4.5-lts.1",
     "nanoid": "^5.0.6",
     "net": "^1.0.2",
-    "next": "^14.1.4",
+    "next": "^15.0.0",
     "next-auth": "^4.24.5",
     "next-seo": "^6.5.0",
     "next-superjson-plugin": "^0.6.3",
